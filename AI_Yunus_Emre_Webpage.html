@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yunus Emre - The Sufi Poet</title>
+    <!-- Beautiful Fonts for a poetic and historic feel -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS reset and base */
+        :root {
+            --primary: #d4af37; /* Elegant Gold */
+            --bg-dark: #121212; /* Deep Black/Gray */
+            --bg-card: rgba(30, 30, 30, 0.7); /* Glassmorphism background */
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lora', serif;
+            background-color: var(--bg-dark);
+            /* A subtle beautiful radial glow in the background */
+            background-image: radial-gradient(circle at 50% 0%, #2a2a2a 0%, #121212 70%);
+            color: var(--text-main);
+            line-height: 1.8;
+            font-size: 18px;
+            overflow-x: hidden;
+            background-attachment: fixed;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 0;
+            animation: fadeInDown 1.5s ease-out;
+        }
+
+        .hero h1 {
+            font-size: 3.8rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .hero p.subtitle {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 40px;
+        }
+
+        .hero-img-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        .hero-img {
+            width: 260px;
+            height: 260px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--primary);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.25);
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.6s ease;
+        }
+
+        .hero-img:hover {
+            transform: scale(1.08) rotate(2deg);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5);
+        }
+
+        /* Biography Section - Glassmorphism Card */
+        .bio {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 45px;
+            text-align: justify;
+            margin-bottom: 50px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            animation: fadeInUp 1.5s ease-out 0.3s both;
+            position: relative;
+        }
+
+        /* Decorative quote mark */
+        .bio::before {
+            content: '"';
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            font-size: 100px;
+            color: rgba(212, 175, 55, 0.15);
+            font-family: 'Playfair Display', serif;
+            line-height: 1;
+        }
+
+        .bio b {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.15em;
+        }
+
+        .bio i {
+            color: #fff;
+            font-style: italic;
+        }
+
+        /* Beautiful Golden Buttons */
+        .btn {
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 12px 35px;
+            border-radius: 30px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: var(--primary);
+            color: var(--bg-dark);
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.6);
+            transform: translateY(-4px);
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Section Titles */
+        .section-title {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 40px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* Interactive Timeline & Poetry Lists */
+        .timeline-list, .poetry-list {
+            list-style: none;
+            animation: fadeInUp 1.5s ease-out 0.6s both;
+        }
+
+        .timeline-list li, .poetry-list li {
+            background: var(--bg-card);
+            margin-bottom: 20px;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid var(--primary);
+            transition: transform 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timeline-list li:hover, .poetry-list li:hover {
+            transform: translateX(10px) scale(1.01);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: rgba(50, 50, 50, 0.8);
+            border-left-color: #fff;
+        }
+
+        .timeline-list b, .poetry-list b {
+            color: var(--primary);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            display: block;
+            margin-bottom: 10px;
+            transition: color 0.3s ease;
+        }
+
+        .timeline-list li:hover b, .poetry-list li:hover b {
+            color: #fff;
+        }
+
+        /* YouTube Media Cards */
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .media-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            overflow: hidden;
+            text-align: center;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .media-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.25);
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+
+        .media-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-bottom: 3px solid rgba(212, 175, 55, 0.4);
+            transition: transform 0.5s ease;
+        }
+
+        .media-card:hover .media-img {
+            transform: scale(1.05);
+        }
+
+        .img-wrapper {
+            overflow: hidden;
+        }
+
+        .media-body {
+            padding: 25px 20px;
+            position: relative;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        }
+
+        .media-body h4 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .media-body .btn {
+            font-size: 0.95rem;
+            padding: 10px 25px;
+            border-width: 1px;
+        }
+
+        /* Elegant Tag Cloud for Empires */
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        .tag {
+            background: rgba(212, 175, 55, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 12px 25px;
+            border-radius: 30px;
+            color: var(--primary);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: default;
+        }
+
+        .tag:hover {
+            background: var(--primary);
+            color: var(--bg-dark);
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.5);
+            transform: translateY(-5px) scale(1.05);
+        }
+
+        /* Entrance Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 50px 0 30px;
+            margin-top: 60px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <header class="hero">
+            <div class="hero-img-wrapper">
+                <img class="hero-img" src="https://apiko.ayk.gov.tr/uploads/2/imagesFile//10044.jpeg" alt="Yunus Emre Portrait">
+            </div>
+            <h1>Yunus Emre</h1>
+            <p class="subtitle">The Great Sufi Poet of Love and Tolerance</p>
+        </header>
+
+        <!-- Biography Section -->
+        <section class="bio">
+            <p>
+                <b>Yunus Emre</b> (c. 1238–1320), also known as <i>Derviş Yûnus</i>, was a 13th-century Turkish Sufi poet and mystic whose influence resonates deeply across the Islamic world. Breaking away from the tradition of writing in Persian or Arabic, he pioneered the use of Old Anatolian Turkish, making complex spiritual truths accessible to the common person. 
+            </p>
+            <br>
+            <p>
+                His verses emphasize divine love, humility, and the brotherhood of humanity, famously captured in his philosophy: <i>"We love the created for the sake of the Creator."</i> Through his simple yet profound folk poetry (hymns), he explored the journey of the soul and the importance of inner peace over external rituals. Today, he is celebrated as a pioneer of Turkish literature and a universal symbol of humanism and tolerance.
+            </p>
+            <div class="text-center" style="margin-top: 35px;">
+                <a href="https://www.yee.org.tr/en/home" target="_blank" class="btn"><i class="fas fa-globe"></i> Visit Official Website</a>
+            </div>
+        </section>
+
+        <!-- Timeline Section -->
+        <section style="margin-top: 80px;">
+            <h2 class="section-title">Important Figures of the Time</h2>
+            <ul class="timeline-list">
+                <li>
+                    <b>Sultan Baibars (reigned 1260–1277)</b>
+                    While Yunus Emre was a young man, Baibars was the "Lion of Egypt"—the Mamluk Sultan who became a legend for being the only ruler capable of standing up to the Mongols who were crushing Anatolia. The Battle of Elbistan (1277) where Baibars famously crushed a Mongol-Seljuk army in eastern Anatolia.
+                </li>
+                <li>
+                    <b>Osman I (Osman Gazi)</b>
+                    The founder of the Ottoman dynasty. While Yunus was writing his poetry in central Anatolia, Osman was busy consolidating power in the northwest. Their lives overlapped significantly, and the spiritual atmosphere Yunus helped create became the "moral glue" of Osman's rising state.
+                </li>
+                <li>
+                    <b>Orhan (Orhan Gazi)</b>
+                    Son of Osman Gazi. He transformed the small Anatolian beylik into a real state, conquered major strongholds and cities, and was the first to step into Balkan Europe (Rumeli).
+                </li>
+                <li>
+                    <b>Rumi (Mevlana Jalaluddin Rumi)</b>
+                    The most famous contemporary of Yunus. While Rumi wrote primarily in Persian for the urban elite and scholars in Konya, Yunus took similar themes of divine love and wrote them in plain Turkish for the common people. Tradition suggests they may have met.
+                </li>
+                <li>
+                    <b>Haci Bektas Veli</b>
+                    A central figure in Alevi-Bektashi spirituality. He was a contemporary who settled in Anatolia and, like Yunus, emphasized inner purity over rigid ritual.
+                </li>
+                <li>
+                    <b>Taptuk Emre</b>
+                    The spiritual master (Murshid) of Yunus Emre. While less "famous" in a global historical sense, he is the most important figure in Yunus’s personal history. Yunus reportedly served at Taptuk’s lodge for 40 years.
+                </li>
+                <li>
+                    <b>Hulagu Khan</b>
+                    The founder of the Ilkhanate who conquered Baghdad and dominated Anatolia. The fear and instability caused by his armies are exactly why the people turned so heavily toward the comforting, mystical messages of poets like Yunus.
+                </li>
+                <li>
+                    <b>Kayqubad I (Alaaddin Keykubad)</b>
+                    Though he died shortly before Yunus was born, his reign represented the "Golden Age" of the Seljuks (Seljuk Sultanate of Rum). Yunus lived in the shadow of the decline that followed this sultan’s death.
+                </li>
+            </ul>
+        </section>
+
+        <!-- Poetry Section -->
+        <section style="margin-top: 100px;">
+            <h2 class="section-title">Famous Poems & Verses</h2>
+            <ul class="poetry-list">
+                <li><b>"Gel Gör Beni Aşk Neyledi" (Come See What Love Did to Me)</b>A widely recognized poem about being consumed by divine love.</li>
+                <li><b>"Şol Cennetin Irmakları" (The Rivers of Paradise)</b>A well-known poem celebrating the spiritual rewards of loving God.</li>
+                <li><b>"İlim İlim Bilmektir" (Knowledge is Knowing Knowledge)</b>Highlights that true knowledge is self-knowledge and understanding the heart.</li>
+                <li><b>"Dağlar İle Taşlar İle" (With Mountains and Stones)</b>A beautiful song calling out to Allah along with all creation.</li>
+                <li><b>"Bana Seni Gerek Seni" (I Need You, Just You)</b>An expression of absolute, total devotion.</li>
+                <li><b>"Dervişlik Dedikleri" (What They Call Being a Dervish)</b>Emphasizes that spirituality lives in the heart, not just in external appearances.</li>
+                <li><b>"Gelin Ey Âşıklar" (Come, O Lovers)</b>A passionate call to join the path of divine love.</li>
+                <li><b>"Yusuf'u Kaybettim" (I Lost Joseph in Canaan)</b>A classic poem referencing deep spiritual loss and longing.</li>
+                <li><b>"N'eylersin Ey Gafil" (What Will You Do, O Unaware One)</b>A warning against becoming overly attached to worldly goods.</li>
+                <li><b>"Miskinlikte Buldular" (They Found it in Humility)</b>A poetic reflection on the vast importance of modesty.</li>
+            </ul>
+        </section>
+
+        <!-- Media Spotlight -->
+        <section style="margin-top: 100px;">
+            <h2 class="section-title">Poetry Spotlight</h2>
+            <div class="media-grid">
+                <!-- Card 1 -->
+                <div class="media-card">
+                    <div class="img-wrapper">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTlnz2HTrhnLfCMJF9QSWKV79IISE9Q2-iQw&s" alt="Gelin Ey Ashiklar Thumbnail" class="media-img">
+                    </div>
+                    <div class="media-body">
+                        <h4>Gelin Ey Âşıklar</h4>
+                        <a href="https://www.youtube.com/watch?v=6aBhY2_n9m4" target="_blank" class="btn"><i class="fab fa-youtube"></i> Watch on YouTube</a>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div class="media-card">
+                    <div class="img-wrapper">
+                        <img src="https://d38vousazc6cao.cloudfront.net/Images/Shop/4/Product/12979/400/f0debe9bffc94fc5859d4a1d9163d40c.jpg" alt="Gel Gör Beni Thumbnail" class="media-img">
+                    </div>
+                    <div class="media-body">
+                        <h4>Gel Gör Beni Aşk Neyledi</h4>
+                        <a href="https://www.youtube.com/watch?v=b1glnj6yjXw" target="_blank" class="btn"><i class="fab fa-youtube"></i> Watch on YouTube</a>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div class="media-card">
+                    <div class="img-wrapper">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTK4Y9JmJ4ak_YiFH_E60nw9J-NfeLP_XMeQA&s" alt="Yusuf'u Kaybettim Thumbnail" class="media-img">
+                    </div>
+                    <div class="media-body">
+                        <h4>Yusuf'u Kaybettim</h4>
+                        <a href="https://www.youtube.com/watch?v=97QXsWNqNlo" target="_blank" class="btn"><i class="fab fa-youtube"></i> Watch on YouTube</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Empires Section -->
+        <section style="margin-top: 100px; margin-bottom: 50px;">
+            <h2 class="section-title">Ongoing Empires & Sultanates</h2>
+            <div class="tags">
+                <span class="tag">Mamluk Sultanate</span>
+                <span class="tag">Mongol Empire</span>
+                <span class="tag">Ilkhanate</span>
+                <span class="tag">Byzantine Empire</span>
+                <span class="tag">Seljuk Rum Sultanate</span>
+                <span class="tag">Anatolian Beyliks</span>
+                <span class="tag">Early Ottoman Empire</span>
+            </div>
+        </section>
+
+        <footer>
+            <p>"We love the created for the sake of the Creator." — Yunus Emre</p>
+        </footer>
+    </div>
+
+</body>
+</html>
