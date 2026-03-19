@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign Garden | Lumina Palace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --wood-dark: #2c1a12;
+            --wood-light: #5c3a21;
+            --brass-light: #d4af37;
+            --brass-dark: #8c6d1f;
+            --shade-off: #c2b29c;
+            --shade-on: #ffd54f;
+            --glow-core: #fff9e6;
+            --transition: 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            /* The base color when the lamp is ON */
+            background-color: #0d1418; 
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            font-family: 'Nunito', sans-serif;
+            transition: background 1.5s ease;
+            position: relative;
+        }
+
+        /* Ambient light gradient when lamp is ON */
+        body.light-on {
+            background: radial-gradient(circle at 30% 50%, #2a3b32 0%, #0d1418 80%);
+        }
+
+        /* --- LIGHT WOODEN HOME BACKGROUND (OFF STATE) --- */
+        .wooden-room {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            /* Light, cozy wood paneling */
+            background: repeating-linear-gradient(to right, #a08466 0px, #a08466 90px, #8b7156 90px, #8b7156 93px);
+            z-index: 1;
+            transition: opacity 1.5s ease;
+        }
+
+        /* Dark vignette overlay to make it feel like nighttime in the room */
+        .wooden-room::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 45% 60%, transparent 10%, rgba(0,0,0,0.7) 100%);
+            pointer-events: none;
+        }
+
+        /* The Window */
+        .room-window {
+            position: absolute;
+            top: 15%;
+            left: 55%; /* Positioned between the lamp and the scroll */
+            width: 180px;
+            height: 260px;
+            /* Night sky outside the window */
+            background: linear-gradient(to bottom, #09101a, #1b263b);
+            border: 10px solid #4a3320; /* Darker wood window frame */
+            border-radius: 4px;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.9), 0 15px 40px rgba(0,0,0,0.6);
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        /* Window Sill */
+        .window-sill {
+            position: absolute;
+            bottom: -15px; left: -15px; right: -15px;
+            height: 15px;
+            background: #3d2716;
+            border-radius: 3px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+            z-index: 3;
+        }
+
+        /* Window Crossbars (Mullions) */
+        .room-window::before {
+            content: ''; position: absolute;
+            top: 0; left: 50%; width: 8px; height: 100%;
+            background: #4a3320; transform: translateX(-50%); z-index: 2;
+        }
+        .room-window::after {
+            content: ''; position: absolute;
+            top: 50%; left: 0; width: 100%; height: 8px;
+            background: #4a3320; transform: translateY(-50%); z-index: 2;
+        }
+
+        /* Pure CSS Twinkling Stars inside the window */
+        .window-stars {
+            position: absolute;
+            width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+                radial-gradient(1.5px 1.5px at 60px 80px, #fff, transparent),
+                radial-gradient(1px 1px at 120px 50px, #fff, transparent),
+                radial-gradient(2px 2px at 140px 180px, #fff, transparent),
+                radial-gradient(1px 1px at 40px 200px, #fff, transparent);
+            opacity: 0.7;
+            animation: twinkle 3s infinite alternate ease-in-out;
+            z-index: 1;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.9; }
+        }
+
+        /* Hide the wooden room & window when lamp is ON */
+        .light-on .wooden-room {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* --- LEFT SIDE: REALISTIC SCENE --- */
+        .scene-left {
+            width: 45%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 70px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Highly Detailed Table */
+        .carved-table {
+            width: 95%;
+            height: 40px;
+            background: linear-gradient(to bottom, #4a2e1b, var(--wood-dark));
+            border-top: 4px solid #7a4c2d;
+            border-radius: 6px 6px 2px 2px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 2px 5px rgba(255,255,255,0.1);
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Table Mat */
+        .table-mat {
+            position: absolute;
+            top: -3px;
+            width: 180px;
+            height: 6px;
+            background: #2d4a3e;
+            border: 2px solid var(--brass-dark);
+            border-radius: 50%;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+        }
+
+        /* Stacked Books & Plant */
+        .decor-cluster {
+            position: absolute;
+            left: 15%;
+            bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .succulent {
+            font-size: 35px;
+            margin-bottom: -12px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+            z-index: 3;
+        }
+
+        .book-top {
+            width: 140px;
+            height: 18px;
+            background: #e07a5f;
+            border-radius: 2px 4px 4px 2px;
+            border-left: 8px solid #c85a42;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            z-index: 2;
+        }
+
+        .book-bottom {
+            width: 155px;
+            height: 22px;
+            background: #3d5a80;
+            border-radius: 2px 4px 4px 2px;
+            border-left: 8px solid #293d5a;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.6);
+            z-index: 1;
+            margin-top: -2px;
+        }
+
+        /* The Lamp Structure */
+        .lamp-assembly {
+            position: relative;
+            bottom: -5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* The Tapered Shade */
+        .lamp-shade {
+            width: 150px;
+            height: 110px;
+            background: var(--shade-off);
+            border-radius: 10px;
+            clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
+            border-bottom: 4px solid var(--wood-dark);
+            box-shadow: inset 0 -20px 30px rgba(0,0,0,0.6);
+            transition: var(--transition);
+            z-index: 4;
+            position: relative;
+        }
+
+        /* Lamp ON State */
+        .light-on .lamp-shade {
+            background: radial-gradient(circle at center, var(--glow-core) 0%, var(--shade-on) 60%, #e69a00 100%);
+            box-shadow: 0 0 80px rgba(255, 213, 79, 0.6), inset 0 0 20px #e69a00;
+        }
+
+        /* Sculpted Brass Base & Stem */
+        .lamp-stem {
+            width: 14px;
+            height: 130px;
+            background: repeating-linear-gradient(45deg, var(--brass-dark), var(--brass-dark) 4px, var(--brass-light) 4px, var(--brass-light) 8px);
+            border-left: 2px solid rgba(0,0,0,0.5);
+            border-right: 2px solid rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+
+        .lamp-base-top {
+            width: 60px;
+            height: 15px;
+            background: var(--brass-light);
+            border-radius: 50% 50% 0 0;
+            border-bottom: 2px solid var(--brass-dark);
+            z-index: 3;
+            margin-bottom: -5px;
+        }
+
+        .lamp-base-bottom {
+            width: 110px;
+            height: 20px;
+            background: linear-gradient(to bottom, var(--brass-light), var(--brass-dark));
+            border-radius: 40px 40px 4px 4px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+            z-index: 1;
+        }
+
+        /* Detailed Pull Chain & Leaf */
+        .pull-chain {
+            position: absolute;
+            left: 45px;
+            top: 105px;
+            cursor: pointer;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .pull-chain:active { transform: translateY(18px); }
+
+        .chain-links {
+            width: 3px;
+            height: 70px;
+            background: repeating-linear-gradient(to bottom, var(--brass-light) 0, var(--brass-light) 3px, rgba(0,0,0,0.8) 3px, rgba(0,0,0,0.8) 5px);
+        }
+
+        .leaf-pull {
+            width: 18px;
+            height: 28px;
+            background: #8b5a2b;
+            border-radius: 0 50% 0 50%;
+            border: 2px solid var(--brass-light);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+            margin-top: -2px;
+            position: relative;
+        }
+        
+        .leaf-pull::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 5px;
+            width: 4px;
+            height: 4px;
+            background: #222;
+            border-radius: 50%;
+        }
+
+        /* --- LIGHT SPREAD EFFECT --- */
+        .ambient-glow {
+            position: absolute;
+            top: 40%;
+            left: 30%;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle at 10% 40%, rgba(255, 213, 79, 0.15) 0%, transparent 65%);
+            opacity: 0;
+            transition: opacity 1.2s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .light-on .ambient-glow { opacity: 1; }
+
+        /* --- RIGHT SIDE: WATERCOLOR AUTH CARD --- */
+        .scene-right {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-right: 60px;
+            z-index: 10;
+        }
+
+        .magic-scroll {
+            width: 420px;
+            opacity: 0;
+            transform: translateY(40px) scale(0.95);
+            transition: var(--transition);
+            pointer-events: none;
+            overflow: hidden;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .light-on .magic-scroll {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+            background: linear-gradient(145deg, #a8e6cf 0%, #dcedc1 40%, #ffd3b6 100%);
+            border: 2px solid #fff;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 0 40px rgba(255,255,255,0.6);
+        }
+
+        /* Typography */
+        .scroll-header { padding: 35px 30px 10px; text-align: center; }
+        .scroll-header h1 { font-family: 'Caveat', cursive; font-size: 2.6rem; color: #2c3e50; line-height: 1.1; margin-bottom: 5px; }
+        .scroll-header p { color: #556b2f; font-weight: 700; font-size: 0.95rem; }
+
+        /* Beautiful Pill Toggle */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 40px;
+            background: rgba(44, 62, 80, 0.1);
+            border-radius: 40px;
+            position: relative;
+            padding: 5px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            color: #2c3e50;
+            cursor: pointer;
+            z-index: 2;
+            transition: 0.3s;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: calc(50% - 5px);
+            height: calc(100% - 10px);
+            background: #fff;
+            border-radius: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 1;
+        }
+
+        .show-signup .toggle-slider { left: calc(50%); }
+
+        /* Form Track */
+        .form-window { width: 100%; overflow: hidden; }
+        .form-track { display: flex; width: 200%; transition: 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+        .form-page { width: 50%; padding: 20px 40px 40px; display: flex; flex-direction: column; gap: 15px; }
+        .show-signup .form-track { transform: translateX(-50%); }
+
+        /* Inputs & Buttons */
+        input {
+            width: 100%;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 2px solid transparent;
+            border-radius: 30px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            color: #2c3e50;
+            outline: none;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        input:focus { background: #fff; border-color: #4ea8de; box-shadow: 0 4px 15px rgba(78, 168, 222, 0.2); }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            background: linear-gradient(135deg, #4ea8de, #2c7da0);
+            border: none;
+            border-radius: 30px;
+            color: #fff;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(44, 125, 160, 0.4);
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(44, 125, 160, 0.6); }
+
+        /* Links */
+        .links { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.85rem; }
+        .links a { color: #2c7da0; text-decoration: none; font-weight: 700; }
+        .links a:hover { text-decoration: underline; }
+
+        /* LIFTED Initial Floating Hint */
+        .rope-hint {
+            position: absolute;
+            top: 10%; /* LIFTED HIGHER: Was 25% previously */
+            left: 20%;
+            color: #e2d1a3;
+            font-family: 'Caveat', cursive;
+            font-size: 1.8rem;
+            pointer-events: none;
+            animation: gentle-bounce 2s infinite ease-in-out;
+            z-index: 20; /* Ensures it's always on top */
+        }
+        @keyframes gentle-bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .light-on .rope-hint { display: none; }
+
+    </style>
+</head>
+<body id="mainBody">
+
+    <div class="wooden-room">
+        <div class="room-window">
+            <div class="window-stars"></div>
+            <div class="window-sill"></div>
+        </div>
+    </div>
+
+    <div class="rope-hint">Pull the leaf to enter...</div>
+
+    <div class="scene-left">
+        <div class="decor-cluster">
+            <div class="succulent">🪴</div>
+            <div class="book-top"></div>
+            <div class="book-bottom"></div>
+        </div>
+
+        <div class="lamp-assembly">
+            <div class="lamp-shade"></div>
+            
+            <div class="pull-chain" onclick="toggleLight()">
+                <div class="chain-links"></div>
+                <div class="leaf-pull"></div>
+            </div>
+            
+            <div class="lamp-base-top"></div>
+            <div class="lamp-stem"></div>
+            <div class="lamp-base-bottom"></div>
+        </div>
+        
+        <div class="carved-table">
+            <div class="table-mat"></div>
+        </div>
+    </div>
+
+    <div class="scene-right">
+        <div class="ambient-glow"></div>
+
+        <div class="magic-scroll" id="authBox">
+            <div class="scroll-header">
+                <h1>Welcome to Lumina</h1>
+                <p>Membership Scroll</p>
+            </div>
+
+            <div class="toggle-container">
+                <div class="toggle-slider"></div>
+                <button class="toggle-btn" onclick="setMode('login')">Login</button>
+                <button class="toggle-btn" onclick="setMode('signup')">Sign Up</button>
+            </div>
+
+            <div class="form-window">
+                <div class="form-track" id="formTrack">
+                    <div class="form-page">
+                        <input type="text" placeholder="Email Address">
+                        <input type="password" placeholder="Passkey">
+                        <button class="submit-btn">Authenticate</button>
+                        <div class="links">
+                            <a href="#">Forgot Passkey?</a>
+                            <a href="#" onclick="setMode('signup')">Need an account?</a>
+                        </div>
+                    </div>
+
+                    <div class="form-page">
+                        <input type="text" placeholder="Your Name">
+                        <input type="email" placeholder="Email Address">
+                        <input type="password" placeholder="New Passkey">
+                        <button class="submit-btn">Initialize Account</button>
+                        <div class="links" style="justify-content: center;">
+                            <a href="#" onclick="setMode('login')">Already a member?</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const body = document.getElementById('mainBody');
+        const authBox = document.getElementById('authBox');
+
+        // Turns the lamp on and off
+        function toggleLight() {
+            body.classList.toggle('light-on');
+        }
+
+        // Slides the form left/right for Login vs Signup
+        function setMode(mode) {
+            if (mode === 'signup') {
+                authBox.classList.add('show-signup');
+            } else {
+                authBox.classList.remove('show-signup');
+            }
+        }
+    </script>
+</body>
+</html>
