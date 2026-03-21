@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>For My Queen ❤️</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #fff0f3;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        overflow: hidden;
+        flex-direction: column;
+        text-align: center;
+        margin: 0;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #ff4d6d;
+        font-size: 2rem;
+        margin-bottom: 20px;
+      }
+      .buttons {
+        position: relative;
+        height: 150px;
+        width: 100%;
+      }
+      button {
+        padding: 12px 25px;
+        font-size: 1.1rem;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        font-weight: bold;
+      }
+      #yesBtn {
+        background-color: #ff4d6d;
+        color: white;
+        z-index: 100;
+      }
+      #noBtn {
+        background-color: #808080;
+        color: white;
+        position: absolute;
+      }
+      #message {
+        display: none;
+        font-size: 1.4rem;
+        color: #c9184a;
+        font-weight: bold;
+        line-height: 1.6;
+      }
+      img {
+        width: 180px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <img
+        src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpueG56ZzR6ZzR6ZzR6ZzR6ZzR6ZzR6ZzR6ZzR6ZzR6ZzR6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/KztT2c4u8mYYUiMKdJ/giphy.gif"
+        alt="Cute Image"
+      />
+
+      <h1 id="mainTitle">ওগো শুনছো, রাগ কমিয়ে আমার ভ্যালেন্টাইন হবে? ❤️</h1>
+
+      <div id="btnContainer" class="buttons">
+        <button id="yesBtn" onclick="celebrate()">হ্যাঁ, অবশ্যই! 😍</button>
+        <button id="noBtn" onmouseover="moveButton()" onclick="moveButton()">
+          উঁহু, কক্ষনো না! 😤
+        </button>
+      </div>
+
+      <div id="message">
+        আমি জানতাম তুমি এটাই বলবে! <br />
+        আই লাভ ইউ সো মাচ বউ! ❤️🌹 <br />
+        জলদি এক কাপ চা নিয়ে আসো তো দেখি! 😉
+      </div>
+    </div>
+
+    <script>
+      function moveButton() {
+        const noBtn = document.getElementById("noBtn");
+        // বাটনটাকে উইন্ডোর ভেতরে যেকোনো জায়গায় র‍্যান্ডমলি পাঠাবে
+        const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - 50);
+        const y =
+          Math.random() * (window.innerHeight - noBtn.offsetHeight - 50);
+
+        noBtn.style.position = "fixed";
+        noBtn.style.left = x + "px";
+        noBtn.style.top = y + "px";
+      }
+
+      function celebrate() {
+        document.getElementById("message").style.display = "block";
+        document.getElementById("btnContainer").style.display = "none";
+        document.getElementById("mainTitle").innerText = "একদম আই লাভ ইউ! 🥰";
+
+        // ছোট একটা কনফেটি এফেক্টের মতো কালার চেঞ্জ
+        document.body.style.backgroundColor = "#ffccd5";
+      }
+    </script>
+  </body>
+</html>
