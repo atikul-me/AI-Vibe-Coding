@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Rise of Artificial Intelligence: A Documentary</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --secondary: #8b5cf6;
+            --accent: #10b981;
+            --dark: #0f172a;
+            --darker: #020617;
+            --light: #f1f5f9;
+        }
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--dark) 0%, var(--darker) 100%);
+            color: var(--light);
+            line-height: 1.6;
+        }
+        .hero {
+            background: linear-gradient(135deg, rgba(0,212,255,0.1) 0%, rgba(139,92,246,0.1) 100%), url('https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+        }
+        .hero .container {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+        }
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .hero p {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        .btn-custom {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,212,255,0.3);
+        }
+        .btn-custom:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,212,255,0.5);
+            color: white;
+        }
+        .navbar {
+            background: rgba(15,23,42,0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,212,255,0.2);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary) !important;
+        }
+        .nav-link {
+            color: var(--light) !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: var(--primary) !important;
+        }
+        .section {
+            padding: 100px 0;
+            position: relative;
+        }
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1px;
+            height: 100px;
+            background: linear-gradient(to bottom, var(--primary), transparent);
+        }
+        .section h2 {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 3rem;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(0,212,255,0.3);
+        }
+        .card {
+            background: rgba(30,41,59,0.8);
+            border: 1px solid rgba(0,212,255,0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            color: var(--light);
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0,212,255,0.2);
+        }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        .card-title {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .timeline-item {
+            background: rgba(30,41,59,0.6);
+            border-left: 4px solid var(--accent);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 0 10px 10px 0;
+        }
+        .timeline-item h4 {
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        .stats {
+            text-align: center;
+            padding: 50px 0;
+        }
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .stat-label {
+            color: var(--light);
+            opacity: 0.8;
+        }
+        footer {
+            background: var(--darker);
+            color: var(--light);
+            padding: 50px 0 20px;
+            border-top: 1px solid rgba(0,212,255,0.2);
+        }
+        .social-icon {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+        .social-icon:hover {
+            color: var(--secondary);
+        }
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            .hero p {
+                font-size: 1.2rem;
+            }
+            .section h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-brain"></i> AI Documentary</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About AI</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#history">History</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#applications">Applications</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#future">Future</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#ethics">Ethics</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="container animate__animated animate__fadeInUp">
+            <h1>The Rise of Artificial Intelligence</h1>
+            <p class="lead">Explore the fascinating journey of AI from ancient concepts to cutting-edge technology shaping our future</p>
+            <a href="#about" class="btn btn-custom">Start Exploring</a>
+        </div>
+    </section>
+
+    <section id="about" class="section">
+        <div class="container">
+            <h2>What is Artificial Intelligence?</h2>
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <img src="https://images.unsplash.com/photo-1555255707-c07966088b7b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80" class="card-img-top" alt="Machine Learning">
+                        <div class="card-body text-center">
+                            <div class="feature-icon"><i class="fas fa-cogs"></i></div>
+                            <h5 class="card-title">Machine Learning</h5>
+                            <p class="card-text">Algorithms that learn from data to make predictions and decisions without explicit programming.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80" class="card-img-top" alt="Deep Learning">
+                        <div class="card-body text-center">
+                            <div class="feature-icon"><i class="fas fa-network-wired"></i></div>
+                            <h5 class="card-title">Deep Learning</h5>
+                            <p class="card-text">Neural networks with multiple layers that mimic the human brain for complex pattern recognition.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80" class="card-img-top" alt="Generative AI">
+                        <div class="card-body text-center">
+                            <div class="feature-icon"><i class="fas fa-magic"></i></div>
+                            <h5 class="card-title">Generative AI</h5>
+                            <p class="card-text">AI systems that create new content, from text and images to music and code.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="history" class="section">
+        <div class="container">
+            <h2>The History of AI</h2>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="timeline-item">
+                        <h4>Ancient Origins</h4>
+                        <p>Concepts of artificial beings appear in ancient Greek mythology and mechanical automata of the 18th century.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>1950s: Birth of AI</h4>
+                        <p>Alan Turing proposes the Turing Test. The Dartmouth Conference establishes AI as a field of study.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>1960s-1970s: Early AI</h4>
+                        <p>Development of expert systems, natural language processing, and the first AI programs.</p>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="timeline-item">
+                        <h4>1980s-1990s: Neural Networks</h4>
+                        <p>Revival of connectionism and development of convolutional neural networks.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>2000s: Big Data Era</h4>
+                        <p>Increased computational power enables machine learning at scale.</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4>2010s-Present: AI Revolution</h4>
+                        <p>Deep learning breakthroughs, generative AI, and widespread adoption across industries.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="applications" class="section">
+        <div class="container">
+            <h2>AI Applications Today</h2>
+            <div class="row text-center stats">
+                <div class="col-md-3">
+                    <div class="stat-number">85%</div>
+                    <div class="stat-label">Companies Using AI</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-number">$500B+</div>
+                    <div class="stat-label">AI Market Value</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-number">300M+</div>
+                    <div class="stat-label">AI Jobs Created</div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">AI Availability</div>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <div class="col-md-6 mb-4">
+                    <h3>Healthcare</h3>
+                    <p>AI assists in drug discovery, diagnostics, personalized medicine, and medical imaging analysis.</p>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <h3>Finance</h3>
+                    <p>Fraud detection, algorithmic trading, risk assessment, and personalized financial advice.</p>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <h3>Transportation</h3>
+                    <p>Autonomous vehicles, route optimization, predictive maintenance, and smart traffic systems.</p>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <h3>Entertainment</h3>
+                    <p>Recommendation systems, content generation, gaming AI, and virtual reality experiences.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="future" class="section">
+        <div class="container">
+            <h2>The Future of AI</h2>
+            <div class="row">
+                <div class="col-lg-6">
+                    <h3>Artificial General Intelligence</h3>
+                    <p>The quest for AGI aims to create systems with human-level intelligence across all domains.</p>
+                </div>
+                <div class="col-lg-6">
+                    <h3>AI-Human Collaboration</h3>
+                    <p>AI will augment human capabilities, leading to new forms of creativity and problem-solving.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="ethics" class="section">
+        <div class="container">
+            <h2>Ethics and Challenges</h2>
+            <div class="row">
+                <div class="col-lg-6">
+                    <h3>Benefits</h3>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Automation of repetitive tasks</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Enhanced decision-making</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Medical breakthroughs</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Environmental solutions</li>
+                    </ul>
+                </div>
+                <div class="col-lg-6">
+                    <h3>Risks</h3>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Job displacement</li>
+                        <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Privacy concerns</li>
+                        <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Bias and discrimination</li>
+                        <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Existential risks</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container text-center">
+            <h3>Explore More About AI</h3>
+            <p>Stay informed about the latest developments in artificial intelligence.</p>
+            <div class="mt-4">
+                <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+            </div>
+            <hr class="my-4">
+            <p>&copy; 2026 AI Documentary. Powered by cutting-edge web technologies.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Animation on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                }
+            });
+        });
+
+        document.querySelectorAll('.card, .timeline-item').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
