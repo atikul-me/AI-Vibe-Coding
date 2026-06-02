@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Beats & Wave Station</title>
+    <style>
+        :root {
+            --bg-dark: #060713;
+            --panel-bg: rgba(15, 18, 36, 0.6);
+            --neon-purple: #bd00ff;
+            --neon-blue: #00d2ff;
+            --text-light: #f8fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 80% 20%, rgba(189, 0, 255, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 20% 80%, rgba(0, 210, 255, 0.15) 0%, transparent 40%);
+            color: var(--text-light);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Glass Visualizer Container */
+        .station-container {
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            width: 850px;
+            max-width: 95%;
+            height: 520px;
+            border-radius: 24px;
+            padding: 35px;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 25px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7);
+            z-index: 10;
+        }
+
+        /* Header Layout */
+        .station-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 15px;
+        }
+
+        .station-title h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .station-title p {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-top: 3px;
+            letter-spacing: 2px;
+        }
+
+        /* Main Engine Canvas Container */
+        .visualizer-area {
+            position: relative;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .track-info-overlay {
+            position: absolute;
+            text-align: center;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        #current-track-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            margin-bottom: 5px;
+        }
+
+        #current-genre {
+            font-size: 0.8rem;
+            color: var(--neon-blue);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        /* Footer Controls and Tracks Selection */
+        .controls-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px 25px;
+            border-radius: 16px;
+        }
+
+        .track-selector {
+            display: flex;
+            gap: 12px;
+        }
+
+        .track-chip {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .track-chip:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .track-chip.active {
+            background: linear-gradient(45deg, rgba(0, 210, 255, 0.2), rgba(189, 0, 255, 0.2));
+            border-color: var(--neon-blue);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+        }
+
+        /* Action Controls Buttons */
+        .btn-play {
+            background: var(--text-light);
+            color: var(--bg-dark);
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-play:hover {
+            transform: scale(1.08);
+            background: var(--neon-blue);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+        }
+
+        /* Background grid layer */
+        .bg-grid {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 0);
+            background-size: 24px 24px;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-grid"></div>
+
+    <div class="station-container">
+        <div class="station-header">
+            <div class="station-title">
+                <h1>COSMIC AUDIO STATION</h1>
+                <p>Synthesizer Frequency Matrix</p>
+            </div>
+            <div style="font-size: 0.8rem; color: #64748b; font-family: monospace;" id="status-node">
+                NODE: STABLE // 60FPS
+            </div>
+        </div>
+
+        <div class="visualizer-area">
+            <div class="track-info-overlay">
+                <div id="current-track-name">NEON HORIZON</div>
+                <div id="current-genre">SYNTHWAVE CYCLES</div>
+            </div>
+            <canvas id="visualizer"></canvas>
+        </div>
+
+        <div class="controls-footer">
+            <div class="track-selector">
+                <div class="track-chip active" onclick="selectTrack('neon')">Neon Horizon</div>
+                <div class="track-chip" onclick="selectTrack('cyber')">Cyberpunk Grid</div>
+                <div class="track-chip" onclick="selectTrack('ambient')">Stellar Core</div>
+            </div>
+
+            <button class="btn-play" id="play-trigger" onclick="togglePlayback()">▶</button>
+        </div>
+    </div>
+
+    <script>
+        // Data Structure Layer
+        const tracks = {
+            neon: { name: "NEON HORIZON", genre: "SYNTHWAVE CYCLES", speed: 2, waveAmp: 45, density: 0.02 },
+            cyber: { name: "CYBERPUNK GRID", genre: "INDUSTRIAL GLITCH", speed: 4, waveAmp: 70, density: 0.05 },
+            ambient: { name: "STELLAR CORE", genre: "DEEP SPACE AMBIENT", speed: 1, waveAmp: 20, density: 0.008 }
+        };
+
+        let currentKey = 'neon';
+        let isPlaying = false;
+        let animationFrameId = null;
+
+        // Canvas Visualizer Initialization
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+
+        function fixCanvasResolution() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        fixCanvasResolution();
+        window.addEventListener('resize', fixCanvasResolution);
+
+        // Core Mathematical Wave Particle Simulator Engine
+        let phase = 0;
+        function renderFrequencies() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const current = tracks[currentKey];
+            const width = canvas.width;
+            const height = canvas.height;
+            const midY = height / 2;
+
+            if (isPlaying) {
+                phase += (current.speed * 0.02);
+            }
+
+            // Draw Background Pulsing Radial Glow
+            let pulseGlow = isPlaying ? Math.sin(phase * 2) * 15 : 0;
+            let gradient = ctx.createRadialGradient(width/2, height/2, 10, width/2, height/2, 200 + pulseGlow);
+            gradient.addColorStop(0, 'rgba(189, 0, 255, 0.06)');
+            gradient.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw Sine Wave Spectrum Layers
+            const layers = [
+                { color: '#00d2ff', alpha: 0.5, shift: 0, ampMult: 1 },
+                { color: '#bd00ff', alpha: 0.3, shift: Math.PI / 2, ampMult: 0.7 },
+                { color: '#ffffff', alpha: 0.15, shift: Math.PI, ampMult: 0.4 }
+            ];
+
+            layers.forEach(layer => {
+                ctx.beginPath();
+                ctx.strokeStyle = layer.color;
+                ctx.globalAlpha = isPlaying ? layer.alpha : 0.1;
+                ctx.lineWidth = isPlaying ? 3 : 1;
+
+                for (let x = 0; x < width; x += 5) {
+                    // Complex sine modulation algorithm
+                    let angle = x * current.density + phase + layer.shift;
+                    let y = midY + Math.sin(angle) * current.waveAmp * layer.ampMult;
+                    
+                    // Fade out at edges smoothly
+                    let edgeFade = Math.sin((x / width) * Math.PI);
+                    y = midY + (y - midY) * edgeFade;
+
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            });
+
+            ctx.globalAlpha = 1.0; // Reset alpha
+            animationFrameId = requestAnimationFrame(renderFrequencies);
+        }
+
+        // Track switching logic routing
+        function selectTrack(key) {
+            currentKey = key;
+            
+            // Switch chips active class UI
+            document.querySelectorAll('.track-chip').forEach(chip => chip.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // Apply updates to metadata text
+            document.getElementById('current-track-name').textContent = tracks[key].name;
+            document.getElementById('current-genre').textContent = tracks[key].genre;
+        }
+
+        // State machine controller for playback
+        function togglePlayback() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('play-trigger');
+            const statusNode = document.getElementById('status-node');
+
+            if (isPlaying) {
+                btn.textContent = "⏸";
+                btn.style.background = "var(--neon-purple)";
+                statusNode.textContent = "NODE: PROCESSING AUDIO STREAMS";
+                statusNode.style.color = "var(--neon-blue)";
+            } else {
+                btn.textContent = "▶";
+                btn.style.background = "var(--text-light)";
+                statusNode.textContent = "NODE: STABLE // IDLE";
+                statusNode.style.color = "#64748b";
+            }
+        }
+
+        // Start Loop Engine
+        renderFrequencies();
+    </script>
+</body>
+</html>
