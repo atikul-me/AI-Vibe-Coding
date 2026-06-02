@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breach OS - Terminal</title>
+    <style>
+        :root {
+            --neon-green: #00ff66;
+            --dark-void: #05050a;
+            --terminal-gray: #12131a;
+            --glow: 0 0 15px rgba(0, 255, 102, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--dark-void);
+            color: var(--neon-green);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Matrix Code Rain Canvas background */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.15;
+        }
+
+        /* Main Terminal Box */
+        .terminal-box {
+            position: relative;
+            z-index: 5;
+            width: 800px;
+            max-width: 95%;
+            height: 500px;
+            background: rgba(18, 19, 26, 0.85);
+            border: 2px solid var(--neon-green);
+            border-radius: 8px;
+            box-shadow: var(--glow), inset 0 0 20px rgba(0, 255, 102, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Top Bar */
+        .terminal-header {
+            background: #1a1c24;
+            padding: 12px 20px;
+            border-bottom: 2px solid var(--neon-green);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #333;
+        }
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27c93f; }
+
+        /* Output Logs Console */
+        .terminal-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .log-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .timestamp { color: #888; }
+        .system-tag { color: #00bfff; }
+        .success-tag { color: var(--neon-green); }
+        .warning-tag { color: #ff3366; }
+
+        /* Input Controls Area */
+        .terminal-footer {
+            padding: 15px 20px;
+            background: #12131a;
+            border-top: 1px solid rgba(0, 255, 102, 0.2);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .prompt-symbol {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        input[type="text"] {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--neon-green);
+            font-family: inherit;
+            font-size: 1rem;
+            flex: 1;
+            caret-color: var(--neon-green);
+        }
+
+        .action-btn {
+            background: var(--neon-green);
+            color: var(--dark-void);
+            border: none;
+            padding: 8px 20px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: var(--glow);
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        .action-btn:hover {
+            background: #fff;
+            box-shadow: 0 0 25px #fff;
+            transform: scale(1.02);
+        }
+
+        /* Scrollbar custom styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--neon-green);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrix"></canvas>
+
+    <div class="terminal-box">
+        <div class="terminal-header">
+            <div class="header-title">⚡ ROOT@BREACH_OS:~</div>
+            <div class="window-dots">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+        </div>
+
+        <div class="terminal-body" id="console-logs">
+            <div class="log-row">
+                <span class="timestamp">[00:00:01]</span>
+                <span class="system-tag">[SYS]</span>
+                <span>Initializing core matrix systems...</span>
+            </div>
+            <div class="log-row">
+                <span class="timestamp">[00:00:02]</span>
+                <span class="success-tag">[OK]</span>
+                <span>Main mainframe connection secured. Ready for payload injection.</span>
+            </div>
+        </div>
+
+        <div class="terminal-footer">
+            <div class="input-line">
+                <span class="prompt-symbol">guest@kali:~$</span>
+                <input type="text" id="cmd-input" placeholder="Type a custom command (e.g., help, hack, clear)..." autocomplete="off">
+            </div>
+            <button class="action-btn" onclick="processCommand()">Execute</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. Matrix Background Code Rain Engine
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZコンニチハ";
+        const charArr = chars.split("");
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(5, 5, 10, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#00ff66";
+            ctx.font = fontSize + "px monospace";
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = charArr[Math.floor(Math.random() * charArr.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 33);
+
+        // 2. Terminal Interactive Console Engine
+        const logContainer = document.getElementById('console-logs');
+        const inputField = document.getElementById('cmd-input');
+
+        // Command handler
+        function processCommand() {
+            const cmd = inputField.value.trim().toLowerCase();
+            if (!cmd) return;
+
+            // Log user entered text
+            createLogRaw(`guest@kali:~$ ${inputField.value}`, 'system-tag');
+
+            // Command logic processing router
+            setTimeout(() => {
+                if (cmd === 'help') {
+                    createLogRaw('Available commands: [hack] [clear] [status] [system]', 'success-tag');
+                } else if (cmd === 'hack') {
+                    createLogRaw('⚠️ Initiating brute force bypass...', 'warning-tag');
+                    triggerFakeHackingSequence();
+                } else if (cmd === 'clear') {
+                    logContainer.innerHTML = '';
+                } else if (cmd === 'status') {
+                    createLogRaw('SYSTEM: OVERCLOCKED // CORE TEMP: 42°C // DEFENSES: COMPROMISED', 'success-tag');
+                } else {
+                    createLogRaw(`Error: Command '${cmd}' not recognized. Type 'help' for instructions.`, 'warning-tag');
+                }
+            }, 150);
+
+            inputField.value = '';
+        }
+
+        // Add log function
+        function createLogRaw(text, tagClass) {
+            const timeStr = new Date().toLocaleTimeString();
+            const row = document.createElement('div');
+            row.className = 'log-row';
+            row.innerHTML = `
+                <span class="timestamp">[${timeStr}]</span>
+                <span class="${tagClass}">[>]</span>
+                <span>${text}</span>
+            `;
+            logContainer.appendChild(row);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // Complex scripted visual timer routine
+        function triggerFakeHackingSequence() {
+            const sequences = [
+                { text: "Connecting to bypass proxy networks...", tag: "system-tag" },
+                { text: "Injecting malicious SQL payloads to port 8080...", tag: "warning-tag" },
+                { text: "Downloading encrypted databanks [======>  ] 64%", tag: "system-tag" },
+                { text: "💥 ACCESS GRANTED! Mainframe completely pwned.", tag: "success-tag" }
+            ];
+
+            sequences.forEach((seq, index) => {
+                setTimeout(() => {
+                    createLogRaw(seq.text, seq.tag);
+                }, (index + 1) * 800);
+            });
+        }
+
+        // Enter key support trigger
+        inputField.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') processCommand();
+        });
+    </script>
+</body>
+</html>
