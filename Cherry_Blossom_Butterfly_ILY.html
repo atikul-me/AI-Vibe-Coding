@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Sakura Magic</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0b0518; /* Rich, dark cinematic night background */
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* Ambient Spotlight Background */
+    .bg-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(255, 20, 147, 0.2) 0%, transparent 70%);
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    /* ====== SAKURA FALLING ANIMATION ====== */
+    .sakura-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .petal {
+        position: absolute;
+        background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+        border-radius: 15px 2px 15px 15px; /* Sakura Petal Shape */
+        opacity: 0.85;
+        box-shadow: 0 0 8px rgba(255, 117, 140, 0.5);
+        animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+        0% {
+            transform: translateY(-20px) rotate(0deg) translateX(0);
+            opacity: 0;
+        }
+        10% { opacity: 0.85; }
+        90% { opacity: 0.85; }
+        100% {
+            transform: translateY(105vh) rotate(720deg) translateX(100px);
+            opacity: 0;
+        }
+    }
+
+    /* ====== CENTERED INTERACTION AREA ====== */
+    .container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        z-index: 10;
+    }
+
+    /* Premium Button Style */
+    #reveal-btn {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 117, 140, 0.6);
+        color: #fff;
+        padding: 18px 45px;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 117, 140, 0.3);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #reveal-btn:hover {
+        background: rgba(255, 117, 140, 0.3);
+        border-color: #ff758c;
+        box-shadow: 0 15px 35px rgba(255, 117, 140, 0.5), 0 0 25px #ff7eb3;
+        transform: scale(1.05);
+    }
+
+    /* ====== MAGICAL HEART SHOWCASE ====== */
+    .heart-wrapper {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin-bottom: 30px;
+        display: none; /* Triggered by JS */
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* Pulse/Beat for Content */
+    .glowing-heart {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        background: #ff2a5f;
+        transform: rotate(-45deg);
+        margin: 25px auto;
+        box-shadow: 0 0 30px #ff2a5f, 0 0 60px #ff758c;
+        animation: heartBeat 1.2s infinite alternate cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .glowing-heart:before, .glowing-heart:after {
+        content: "";
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: #ff2a5f;
+        border-radius: 50%;
+    }
+
+    .glowing-heart:before { top: -50px; left: 0; }
+    .glowing-heart:after { top: 0; left: 50px; }
+
+    @keyframes heartBeat {
+        0% { transform: rotate(-45deg) scale(0.95); box-shadow: 0 0 25px #ff2a5f; }
+        100% { transform: rotate(-45deg) scale(1.1); box-shadow: 0 0 45px #ff758c, 0 0 70px #ff2a5f; }
+    }
+
+    /* ====== REVEALED PREMIUM TEXT ====== */
+    #message-text {
+        font-family: 'Dancing Script', cursive;
+        font-size: 60px;
+        color: #ffffff;
+        text-shadow: 0 0 10px #ff758c, 0 0 20px #ff7eb3, 0 0 40px #ff1493;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 2s ease;
+        text-align: center;
+        pointer-events: none;
+    }
+
+    /* Sparkling Light Particles */
+    .particle {
+        position: absolute;
+        background: #fff;
+        border-radius: 50%;
+        pointer-events: none;
+        animation: floatUp 2s infinite ease-out;
+    }
+
+    @keyframes floatUp {
+        0% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0px); }
+        100% { transform: translateY(-120px) scale(0); opacity: 0; filter: blur(1px); }
+    }
+</style>
+</head>
+<body>
+
+    <div class="bg-glow"></div>
+    <div class="sakura-container" id="sakura-screen"></div>
+
+    <div class="container">
+        <div class="heart-wrapper" id="heart-box">
+            <div class="glowing-heart"></div>
+        </div>
+
+        <button id="reveal-btn">Click to Reveal</button>
+
+        <div id="message-text">I Love You Sanjida 🤍🖤</div>
+    </div>
+
+    <script>
+        const sakuraScreen = document.getElementById('sakura-screen');
+        const revealBtn = document.getElementById('reveal-btn');
+        const heartBox = document.getElementById('heart-box');
+        const messageText = document.getElementById('message-text');
+
+        // Continuous Sakura Rain Generator
+        function createPetal() {
+            const petal = document.createElement('div');
+            petal.className = 'petal';
+            
+            // Randomize size, position, speed, and horizontal sway
+            const sizeWidth = Math.random() * 12 + 10; // 10px to 22px
+            const sizeHeight = sizeWidth * 0.85;
+            
+            petal.style.width = sizeWidth + 'px';
+            petal.style.height = sizeHeight + 'px';
+            petal.style.left = Math.random() * 100 + 'vw';
+            
+            const duration = Math.random() * 4 + 5; // 5s to 9s fall
+            petal.style.animationDuration = duration + 's';
+            petal.style.animationDelay = Math.random() * 2 + 's';
+            
+            sakuraScreen.appendChild(petal);
+            
+            // Cleanup to keep DOM light
+            setTimeout(() => { petal.remove(); }, (duration + 2) * 1000);
+        }
+
+        // Initialize and maintain beautiful petal storm
+        for(let i=0; i<40; i++) { createPetal(); }
+        setInterval(createPetal, 200);
+
+        // Core Interaction Animation Script
+        revealBtn.addEventListener('click', () => {
+            // 1. Elegant button fade out
+            revealBtn.style.opacity = '0';
+            revealBtn.style.transform = 'scale(0.8)';
+            
+            setTimeout(() => {
+                revealBtn.style.display = 'none';
+
+                // 2. Bring up the Vibrant Glowing Heart Core
+                heartBox.style.display = 'block';
+                setTimeout(() => {
+                    heartBox.style.opacity = '1';
+                    heartBox.style.transform = 'scale(1)';
+                }, 50);
+
+                // Start throwing magical sparks from the heart core
+                setInterval(createSpark, 150);
+
+                // 3. Crisp Text Reveal with subtle delays
+                setTimeout(() => {
+                    messageText.style.opacity = '1';
+                    messageText.style.transform = 'translateY(0)';
+                }, 800);
+
+            }, 500);
+        });
+
+        // Magical Floating Sparks Engine
+        function createSpark() {
+            if (heartBox.style.opacity !== '1') return;
+            const spark = document.createElement('div');
+            spark.className = 'particle';
+            
+            // Position around the center area
+            const randomX = (Math.random() * 120 - 60); 
+            spark.style.left = `calc(50% + ${randomX}px)`;
+            spark.style.top = '40%';
+            
+            const size = Math.random() * 4 + 3;
+            spark.style.width = size + 'px';
+            spark.style.height = size + 'px';
+            
+            // Dynamic colorful glowing sparks
+            const colors = ['#fff', '#ffcbd5', '#ff758c', '#ff0055'];
+            spark.style.background = colors[Math.floor(Math.random() * colors.length)];
+            spark.style.boxShadow = `0 0 10px ${spark.style.background}`;
+            
+            document.body.appendChild(spark);
+            setTimeout(() => { spark.remove(); }, 2000);
+        }
+    </script>
+</body>
+</html>
