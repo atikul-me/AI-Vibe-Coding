@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Realistic Jet Flight - Low-Poly Tropical Ocean Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0c243d;
+            color: #fff;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Dynamic Sky Layer Backdrop */
+        .sky-base {
+            position: absolute;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(to bottom, #0d1b2a 0%, #1b263b 35%, #415a77 55%, #a3b18a 65%, #e0e1dd 100%);
+            z-index: 1;
+        }
+
+        /* Main Processing Graphics Viewport Surface Canvas */
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 5;
+        }
+
+        /* Glassmorphic Data Instrument Avionics Panel Display */
+        .flight-hud {
+            position: absolute;
+            top: 25px; left: 25px; z-index: 10;
+            background: rgba(13, 27, 42, 0.7);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 14px;
+            width: 320px;
+            pointer-events: none;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        .hud-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #e0e1dd;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 6px;
+        }
+
+        .hud-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+            font-family: monospace;
+        }
+
+        .lbl { color: #a3b18a; }
+        .val { color: #ff4757; font-weight: bold; }
+
+        .onboard-guidance {
+            position: absolute;
+            bottom: 30px; left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            background: rgba(13, 27, 42, 0.85);
+            padding: 10px 30px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            border: 1px solid #a3b18a;
+            pointer-events: none;
+            text-align: center;
+            color: #e0e1dd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sky-base"></div>
+
+    <div class="flight-hud">
+        <div class="hud-title">✈️ MILITARY REAL-JET ENGINE</div>
+        <div class="hud-row">
+            <span class="lbl">ENVIRONMENT LOG:</span>
+            <span class="val" style="color: #2ed573;">LOW-POLY TROPICAL</span>
+        </div>
+        <div class="hud-row">
+            <span class="lbl">VELOCITY TICK:</span>
+            <span id="airspeed-node" class="val">0 km/h</span>
+        </div>
+        <div class="hud-row">
+            <span class="lbl">PITCH MODIFIER:</span>
+            <span id="pitch-node" class="val">0.00°</span>
+        </div>
+        <div class="hud-row">
+            <span class="lbl">AIRFRAME ROLL RATE:</span>
+            <span id="roll-node" class="val">0.00°</span>
+        </div>
+    </div>
+
+    <div class="onboard-guidance">
+        GLIDE MOUSE CURSOR TO AIR-STEER FLIGHT CODES MATRIX
+    </div>
+
+    <canvas id="flightRenderSurface"></canvas>
+
+    <script>
+        const canvas = document.getElementById('flightRenderSurface');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        // User Interface Input Gestures Control Tracking Variables
+        let mouseX = width / 2;
+        let mouseY = height / 2;
+        let worldTimeTicker = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        const horizonY = height * 0.55; // Core landscape clipping node baseline
+
+        // Procedural spatial arrays representing the Low-poly Sandy Island coordinates with strictly vertical palm trees parameters
+        const tropicalIslands = [
+            { xOffset: -350, zDepth: 1.0, sizeRad: 110, isleColor: '#e9c46a', treeCount: 2 },
+            { xOffset: 450, zDepth: 0.75, sizeRad: 90, isleColor: '#f4a261', treeCount: 1 },
+            { xOffset: -600, zDepth: 0.50, sizeRad: 140, isleColor: '#e9c46a', treeCount: 3 },
+            { xOffset: 200, zDepth: 0.25, sizeRad: 80, isleColor: '#f4a261', treeCount: 1 }
+        ];
+
+        // Central Processing Execution Cycle Graphics Engine
+        function runGraphicsRuntime() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Compute physics variations from mouse data mappings
+            let roll = ((mouseX - width / 2) / (width / 2)) * 26;
+            let pitch = ((mouseY - height / 2) / (height / 2)) * 35;
+
+            // Update UI instrumentation tracking text outputs updates
+            document.getElementById('airspeed-node').textContent = `${Math.round(850 + Math.abs(pitch * 5))} MACH`;
+            document.getElementById('pitch-node').textContent = `${pitch.toFixed(2)}°`;
+            document.getElementById('roll-node').textContent = `${roll.toFixed(2)}°`;
+
+            worldTimeTicker += 0.0055; // Relative landscape flight velocity acceleration tracking matrix constant
+
+            // -----------------------------------------------------------------
+            // 1. RENDER LOW-POLY SEA WATER SURFACE LAYER CONTEXT
+            // -----------------------------------------------------------------
+            ctx.save();
+            ctx.translate(width / 2, horizonY + pitch);
+            ctx.rotate(roll * Math.PI / 180);
+
+            // Translucent deep turquoise marine base layer shading values
+            let oceanShade = ctx.createLinearGradient(0, 0, 0, height);
+            oceanShade.addColorStop(0, '#1d3557');  // Horizon deep edge boundary
+            oceanShade.addColorStop(0.3, '#0077b6'); // Translucent crystal blue center
+            oceanShade.addColorStop(1, '#03045e');   // Abyssal near-field viewport block
+            ctx.fillStyle = oceanShade;
+            ctx.fillRect(-width * 4, 0, width * 8, height * 2);
+
+            // Infinite low-poly rolling waves sequence mapping loops (Rasta furaia jay engine)
+            let perspectiveRows = 22;
+            for (let i = 1; i < perspectiveRows; i++) {
+                let waveProgress = (i + (worldTimeTicker * 45 % 1)) / perspectiveRows;
+                let waveY = Math.pow(waveProgress, 2.5) * (height - horizonY) * 1.5; // Exponential camera scaling compression logic formula
+                
+                ctx.strokeStyle = `rgba(255, 255, 255, ${waveProgress * 0.15})`;
+                ctx.lineWidth = 0.5 + waveProgress * 2.5;
+
+                // Generating flat discrete cartoon ridges layout instead of curved continuous lines
+                ctx.beginPath();
+                let stepsCount = 14;
+                for (let j = 0; j <= stepsCount; j++) {
+                    let stepX = (-width * 2) + (width * 4) * (j / stepsCount);
+                    // Add minor structural vertex spikes to form sharp low-poly wave structures lines
+                    let polySpike = Math.sin((j * 1.5) + (worldTimeTicker * 12)) * 4 * waveProgress;
+                    if (j === 0) ctx.moveTo(stepX, waveY + polySpike);
+                    else ctx.lineTo(stepX, waveY + polySpike);
+                }
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // -----------------------------------------------------------------
+            // 2. RENDER COCONUT PALM ISLANDS MESH STACK (STRICTLY VERTICAL GEOMETRY)
+            // -----------------------------------------------------------------
+            tropicalIslands.forEach(isle => {
+                isle.zDepth -= 0.0035; // Continuous forward acceleration shift tracking parameter loops
+                if (isle.zDepth <= 0) {
+                    isle.zDepth = 1.0;  // Infinite map reuse looping allocation array index
+                    isle.xOffset = (Math.random() - 0.5) * width * 1.6;
+                }
+
+                let focalScale = 1 / isle.zDepth;
+                
+                // Camera transformations calculation applying matrices coordinates profiles map
+                // Apply matrix translation transformations tracking plane movements offset maps
+                let isleX = width / 2 + isle.xOffset * focalScale - (roll * 4.5);
+                let isleY = (horizonY + pitch) + (160 * focalScale);
+                
+                let radiusW = isle.sizeRad * focalScale * 0.4;
+                let radiusH = isle.sizeRad * focalScale * 0.18;
+
+                // Render execution condition checking index limits boundary
+                if (isle.zDepth < 0.98 && isleY > horizonY + pitch) {
+                    ctx.save();
+
+                    // --- DRAW LOW-POLY CARTOON FLAT GRADIENT SANDY ISLAND ---
+                    ctx.fillStyle = isle.isleColor;
+                    ctx.beginPath();
+                    // Geometric low poly faceted look base profile coordinates tracing
+                    ctx.moveTo(isleX - radiusW, isleY);
+                    ctx.lineTo(isleX - radiusW * 0.4, isleY - radiusH * 0.8);
+                    ctx.lineTo(isleX + radiusW * 0.2, isleY - radiusH * 1.0); // Highest sand ridge node point
+                    ctx.lineTo(isleX + radiusW * 0.6, isleY - radiusH * 0.4);
+                    ctx.lineTo(isleX + radiusW, isleY);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Lush tropical low-poly inner green core center mound segment
+                    ctx.fillStyle = '#2a9d8f';
+                    ctx.beginPath();
+                    ctx.moveTo(isleX - radiusW * 0.6, isleY);
+                    ctx.lineTo(isleX - radiusW * 0.2, isleY - radiusH * 0.6);
+                    ctx.lineTo(isleX + radiusW * 0.1, isleY - radiusH * 0.7);
+                    ctx.lineTo(isleX + radiusW * 0.5, isleY);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // --- DRAW STRICTLY VERTICAL COCONUT PALM TREES (KHARAY ROICHE LOOK) ---
+                    // Trees should not tilt with sea rotation matrices—they are fixed straight vertical assets!
+                    for (let t = 0; t < isle.treeCount; t++) {
+                        let treeSpacingX = (t - (isle.treeCount - 1) * 0.5) * (40 * focalScale * 0.25);
+                        let baseTrunkX = isleX + treeSpacingX;
+                        // Calculate precise slope offset y mapping ground height level configuration matrix positions
+                        let baseTrunkY = isleY - (radiusH * 0.4); 
+
+                        let trunkHeight = 65 * focalScale * 0.35;
+                        let trunkWidth = 3.5 * focalScale * 0.4;
+
+                        // Render Cartoon Faceted Tree Trunk Segment Columns
+                        ctx.fillStyle = '#6d4c41'; // Dark wood brown tone block
+                        ctx.beginPath();
+                        ctx.moveTo(baseTrunkX - trunkWidth, baseTrunkY);
+                        ctx.lineTo(baseTrunkX - trunkWidth * 0.5, baseTrunkY - trunkHeight); // Strictly vertical up direction line tracking
+                        ctx.lineTo(baseTrunkX + trunkWidth * 0.5, baseTrunkY - trunkHeight);
+                        ctx.lineTo(baseTrunkX + trunkWidth, baseTrunkY);
+                        ctx.closePath();
+                        ctx.fill();
+
+                        // Render Low-Poly Spiky Ray-Like Sharp Coconut Palm Leaves Crowns
+                        let topCrownX = baseTrunkX;
+                        let topCrownY = baseTrunkY - trunkHeight;
+                        let leafLength = 22 * focalScale * 0.35;
+
+                        ctx.fillStyle = '#1b4332'; // Deep tropical green shaded low poly leaves facets
+                        
+                        // Explicitly mapping distinct 5 sharp triangle clusters nodes to represent palm fronds branches
+                        let leafAngles = [0, 72, 144, 216, 288];
+                        leafAngles.forEach(angle => {
+                            let radAngle = (angle) * Math.PI / 180;
+                            let pulseAnimateLeaf = Math.sin(worldTimeTicker * 8 + t) * 0.08; // Delicate micro cartoon breeze wind wave vectors
+                            
+                            let tipX = topCrownX + Math.cos(radAngle + pulseAnimateLeaf) * leafLength;
+                            let tipY = topCrownY + Math.sin(radAngle + pulseAnimateLeaf) * leafLength * 0.7; // Vertical gravity squash factor tracking 
+                            
+                            ctx.beginPath();
+                            ctx.moveTo(topCrownX, topCrownY);
+                            ctx.lineTo(tipX, tipY);
+                            ctx.lineTo(topCrownX + Math.cos(radAngle + 0.5) * (leafLength * 0.3), topCrownY + Math.sin(radAngle + 0.5) * (leafLength * 0.3));
+                            ctx.closePath();
+                            ctx.fill();
+                        });
+
+                        // Minor cartoon blocky cluster node to trace green coconuts fruit points
+                        ctx.fillStyle = '#eeef20';
+                        ctx.beginPath(); ctx.arc(topCrownX, topCrownY + 2, 2.5 * focalScale * 0.35, 0, Math.PI*2); ctx.fill();
+                    }
+
+                    ctx.restore();
+                }
+            });
+
+            // -----------------------------------------------------------------
+            // 3. RENDER HIGH-FIDELITY REALISTIC MILITARY FIGHTER JET BLUEPRINT
+            // -----------------------------------------------------------------
+            // Linear anchor smoothing track routing points maps perfectly tracking mouse cursor
+            let jetX = width / 2 + (mouseX - width / 2) * 0.25;
+            let jetY = height * 0.70 + (mouseY - height / 2) * 0.20;
+
+            ctx.save();
+            ctx.translate(jetX, jetY);
+            ctx.rotate((roll * 0.7) * Math.PI / 180); // Aero structural wing roll deflection computation
+
+            // Twin Engine Afterburners Propulsive Fires Glow Sparks Embers
+            let flameSize = Math.random() * 32 + 18;
+            let thrustGrad = ctx.createLinearGradient(0, 20, 0, 20 + flameSize);
+            thrustGrad.addColorStop(0, '#ffffff');
+            thrustGrad.addColorStop(0.2, '#00f3ff');
+            thrustGrad.addColorStop(0.6, '#ff0055');
+            thrustGrad.addColorStop(1, 'rgba(255,0,85,0)');
+            ctx.fillStyle = thrustGrad;
+            ctx.fillRect(-14, 18, 5, flameSize);
+            ctx.fillRect(9, 14, 5, flameSize);
+
+            // Realistic tactical hardware color palettes setup (Metallic shaded plates structures layers)
+            let coreFuselageShade = ctx.createLinearGradient(-30, 0, 30, 0);
+            coreFuselageShade.addColorStop(0, '#1c2541'); // Deep under-plate metal hull panel shadows
+            coreFuselageShade.addColorStop(0.3, '#3b4b66'); // Primary titanium aviation alloy material
+            coreFuselageShade.addColorStop(0.7, '#5c6b84'); // Highlight sun flare sheen plating reflection tracking index
+            coreFuselageShade.addColorStop(1, '#0b1121'); // Occluded frame limits borders shading
+
+            let wingPanelsShade = ctx.createLinearGradient(-120, 0, 120, 0);
+            wingPanelsShade.addColorStop(0, '#0f1423');
+            wingPanelsShade.addColorStop(0.4, '#2c394b');
+            wingPanelsShade.addColorStop(0.6, '#48566b');
+            wingPanelsShade.addColorStop(1, '#080b14');
+
+            // --- MAIN HIGH-ACCURACY REAL MILITARY SWEEP WINGS SHAPE ---
+            ctx.fillStyle = wingPanelsShade;
+            ctx.beginPath();
+            ctx.moveTo(0, -18); // Forward root neck panel intersection point links
+            ctx.lineTo(-112, 14); // Extreme left sharp outer wingtip point assembly location index
+            ctx.lineTo(-108, 22); // Left flaperon trailing control edge node joint points
+            ctx.lineTo(-38, 18);  // Engine bay fuselage anchor mounts lines coordinates
+            ctx.lineTo(38, 18);   // Engine bay fuselage anchor mounts lines coordinates
+            ctx.lineTo(108, 22);  // Right flaperon trailing control edge node joint points
+            ctx.lineTo(112, 14);  // Extreme right sharp outer wingtip point assembly location index
+            ctx.closePath();
+            ctx.fill();
+
+            // Wing panel technical surface armor mechanical panel dividing tracing lines
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(-38, 18); ctx.lineTo(-90, 15);
+            ctx.moveTo(38, 18); ctx.lineTo(90, 15);
+            ctx.stroke();
+
+            // Navigation flash strobe beacon lighting indicators updates triggers
+            ctx.fillStyle = 'rgba(255, 0, 68, 0.9)'; // Port red beacon light point marker 
+            ctx.beginPath(); ctx.arc(-112, 14, 3, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = 'rgba(0, 255, 120, 0.9)'; // Starboard green beacon light point marker
+            ctx.beginPath(); ctx.arc(112, 14, 3, 0, Math.PI * 2); ctx.fill();
+
+            // --- DOUBLE OUTBOARD REAR ELEVATORS HORIZONTAL FLAPS TAIL FLAPS ---
+            ctx.fillStyle = '#111728';
+            ctx.beginPath(); ctx.moveTo(-28, 18); ctx.lineTo(-58, 38); ctx.lineTo(-18, 34); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(28, 18); ctx.lineTo(58, 38); ctx.lineTo(18, 34); ctx.closePath(); ctx.fill();
+
+            // --- REALISTIC CHASSIS FUSELAGE CENTRAL FRAME STRUCTURAL OUTLINE ---
+            ctx.fillStyle = coreFuselageShade;
+            ctx.beginPath();
+            ctx.moveTo(0, -65); // Razor sharp nose cone tip radar array target module reference
+            ctx.lineTo(-5, -50); // Left pitot static tube transitions alignment node
+            ctx.lineTo(-15, -20); // Left main pilot deck windshield frame tracks lines boundary
+            ctx.lineTo(-18, 22);  // Left engine compression air intake housing module corner
+            ctx.lineTo(18, 22);   // Right engine compression air intake housing module corner
+            ctx.lineTo(15, -20);  // Right main pilot deck windshield frame tracks lines boundary
+            ctx.lineTo(5, -50);  // Right pitot static tube transitions alignment node
+            ctx.closePath();
+            ctx.fill();
+
+            // --- HIGH DEFINITION COCKPIT CANOPY CHROMATIC POLARIZED GLASS RENDER ---
+            let canopyGlassGrad = ctx.createLinearGradient(0, -36, 0, -2);
+            canopyGlassGrad.addColorStop(0, '#ffffff'); // Mirror specular white reflection peak glare light node
+            canopyGlassGrad.addColorStop(0.25, '#73a2bd'); // Central tinted crystal glass composite layer mapping
+            canopyGlassGrad.addColorStop(0.75, '#1d3d54'); // Dark avionics dashboard interior shadow backdrop values
+            canopyGlassGrad.addColorStop(1, '#09141c');    // Lower bulkhead rear seal retaining metal track bounds
+            ctx.fillStyle = canopyGlassGrad;
+            ctx.beginPath();
+            ctx.moveTo(0, -38);
+            ctx.lineTo(-7, -18);
+            ctx.lineTo(-4, -2);
+            ctx.lineTo(4, -2);
+            ctx.lineTo(7, -18);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+
+            requestAnimationFrame(runGraphicsRuntime);
+        }
+
+        // Initialize execution sequences logic runtime instances tracking loop
+        runGraphicsRuntime();
+    </script>
+</body>
+</html>
