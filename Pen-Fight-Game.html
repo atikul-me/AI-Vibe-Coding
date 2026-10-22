@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Pen Fight — Nostalgia Edition</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:radial-gradient(circle at 50% -10%, #2a1f52 0%, #0d0a1a 45%, #04030a 100%);
+    color:#eae7ff;
+    font-family:'Hind Siliguri','Segoe UI',system-ui,-apple-system,sans-serif;
+    display:flex;flex-direction:column;
+    height:100dvh;overflow:hidden;
+    padding:10px 10px 10px;gap:8px;
+  }
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    width:100%;max-width:1000px;margin:0 auto;flex:0 0 auto;
+  }
+  .chip{
+    display:flex;align-items:center;gap:7px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.09);
+    padding:6px 11px;border-radius:999px;
+    font-size:12.5px;font-weight:700;letter-spacing:.3px;
+    white-space:nowrap;transition:all .25s ease;
+  }
+  .chip .dot{width:9px;height:9px;border-radius:50%;background:#666;flex:0 0 auto;
+             box-shadow:0 0 8px currentColor;}
+  .chip.active{
+    background:linear-gradient(135deg,rgba(124,92,255,.4),rgba(34,211,238,.18));
+    border-color:rgba(124,92,255,.75);
+    box-shadow:0 0 22px rgba(124,92,255,.45);
+  }
+  .turnmsg{
+    font-size:13px;font-weight:700;letter-spacing:.4px;
+    color:#b9b2e6;text-align:center;flex:1;
+    text-shadow:0 0 18px rgba(124,92,255,.6);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+
+  /* ---------- STAGE ---------- */
+  .stage{
+    position:relative;flex:1 1 auto;min-height:0;
+    width:100%;max-width:1000px;margin:0 auto;
+    border-radius:18px;overflow:hidden;
+    box-shadow:0 24px 70px rgba(0,0,0,.75), inset 0 0 0 1px rgba(255,255,255,.07);
+    background:#0a0814;
+  }
+  canvas{display:block;width:100%;height:100%;touch-action:none;}
+
+  /* ---------- OVERLAYS ---------- */
+  .overlay{
+    position:absolute;inset:0;z-index:10;
+    background:rgba(7,5,14,.86);
+    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+    display:flex;align-items:center;justify-content:center;
+    padding:14px;opacity:1;transition:opacity .28s ease;
+  }
+  .overlay.hidden{opacity:0;pointer-events:none;}
+  .panel{
+    width:100%;max-width:700px;max-height:100%;overflow:auto;
+    text-align:center;padding:4px;
+    scrollbar-width:thin;
+  }
+  .panel::-webkit-scrollbar{width:6px;}
+  .panel::-webkit-scrollbar-thumb{background:rgba(124,92,255,.5);border-radius:9px;}
+
+  h1{
+    margin:0 0 2px;font-size:clamp(26px,7vw,44px);font-weight:900;letter-spacing:2px;
+    background:linear-gradient(100deg,#a78bfa,#22d3ee 55%,#f472b6);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 24px rgba(124,92,255,.55));
+  }
+  h1 span{color:transparent;}
+  .sub{margin:0 0 14px;font-size:clamp(11px,3vw,14px);color:#8f88b8;letter-spacing:.3px;}
+
+  .cards{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin:0 0 14px;}
+  .card{
+    flex:1 1 150px;max-width:210px;min-width:132px;
+    background:linear-gradient(160deg,rgba(255,255,255,.075),rgba(255,255,255,.015));
+    border:1.5px solid rgba(255,255,255,.1);
+    border-radius:16px;padding:12px 9px 11px;
+    color:inherit;font-family:inherit;cursor:pointer;
+    transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease;
+    text-align:center;
+  }
+  .card:active{transform:scale(.97);}
+  .card.sel{
+    border-color:#8b6cff;
+    background:linear-gradient(160deg,rgba(124,92,255,.32),rgba(34,211,238,.08));
+    box-shadow:0 0 28px rgba(124,92,255,.45);
+    transform:translateY(-3px);
+  }
+  .picon{width:56px;height:56px;margin:0 auto 6px;display:block;}
+  .cname{font-size:13.5px;font-weight:800;letter-spacing:.3px;}
+  .cdesc{font-size:10.5px;color:#918ab8;margin:3px 0 9px;line-height:1.35;min-height:28px;}
+  .stat{display:flex;align-items:center;gap:6px;margin:5px 0;font-size:9.5px;color:#8f88b8;font-weight:700;}
+  .stat span{width:34px;text-align:left;letter-spacing:.3px;}
+  .bar{flex:1;height:5px;border-radius:9px;background:rgba(255,255,255,.09);overflow:hidden;}
+  .bar i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#7c5cff,#22d3ee);}
+
+  .btn{
+    display:inline-block;width:100%;max-width:320px;
+    padding:14px 22px;border:none;border-radius:14px;cursor:pointer;
+    font-family:inherit;font-size:15px;font-weight:900;letter-spacing:.6px;
+    color:#0a0716;
+    background:linear-gradient(100deg,#a78bfa,#22d3ee 60%,#67e8f9);
+    box-shadow:0 10px 34px rgba(124,92,255,.5);
+    transition:transform .15s ease,box-shadow .15s ease;
+  }
+  .btn:active{transform:scale(.97);box-shadow:0 6px 20px rgba(124,92,255,.4);}
+  .btn.ghost{
+    background:rgba(255,255,255,.07);color:#cfc9f0;
+    border:1.5px solid rgba(255,255,255,.15);
+    box-shadow:none;margin-top:9px;
+  }
+
+  /* ---------- RESULT ---------- */
+  .resultTitle{font-size:clamp(24px,6.5vw,40px);font-weight:900;letter-spacing:1.5px;margin:0 0 6px;}
+  .win{background:linear-gradient(100deg,#34d399,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 22px rgba(52,211,153,.6));}
+  .lose{background:linear-gradient(100deg,#fb7185,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 22px rgba(251,113,133,.6));}
+  .draw{background:linear-gradient(100deg,#fbbf24,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .resultSub{font-size:12.5px;color:#8f88b8;margin:0 0 18px;line-height:1.6;}
+
+  /* ---------- TOAST ---------- */
+  .toast{
+    position:absolute;left:50%;top:14px;transform:translate(-50%,-24px);
+    background:linear-gradient(135deg,rgba(251,113,133,.92),rgba(244,114,182,.92));
+    color:#1a0610;font-weight:900;font-size:12.5px;letter-spacing:.5px;
+    padding:8px 18px;border-radius:999px;pointer-events:none;z-index:20;
+    opacity:0;transition:all .35s cubic-bezier(.2,1.2,.4,1);
+    box-shadow:0 8px 26px rgba(251,113,133,.5);white-space:nowrap;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+
+  /* ---------- FOOTER ---------- */
+  .foot{
+    flex:0 0 auto;width:100%;max-width:1000px;margin:0 auto;
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:10.5px;color:#6d6690;font-weight:700;letter-spacing:.4px;
+    padding:0 4px;
+  }
+  .foot b{color:#a99ee8;}
+
+  @media (max-width:520px){
+    .chip{padding:5px 9px;font-size:11px;}
+    .turnmsg{font-size:11.5px;}
+    .card{min-width:104px;flex:1 1 104px;padding:9px 6px 8px;}
+    .cdesc{display:none;}
+    .picon{width:44px;height:44px;}
+    .foot{font-size:9.5px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="chip" id="chipYou"><span class="dot" id="dotYou"></span><span>YOU</span></div>
+  <div class="turnmsg" id="turnMsg">পেন বেছে নাও</div>
+  <div class="chip" id="chipAi"><span>CPU</span><span class="dot" id="dotAi"></span></div>
+</div>
+
+<div class="stage" id="stage">
+  <canvas id="cv"></canvas>
+  <div class="toast" id="toast">Arena chhoto holo!</div>
+
+  <!-- MENU -->
+  <div class="overlay" id="menuOverlay">
+    <div class="panel">
+      <h1>PEN FIGHT</h1>
+      <p class="sub">স্কুলের বেঞ্চে পেন ফাইট — এবার অনলাইনে 🖊️</p>
+      <div class="cards" id="penCards"></div>
+      <button class="btn" id="startBtn">ম্যাচ শুরু করো</button>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="overlay hidden" id="overOverlay">
+    <div class="panel">
+      <div class="resultTitle" id="resTitle">YOU WIN</div>
+      <p class="resultSub" id="resSub"></p>
+      <button class="btn" id="againBtn">আবার খেলবো</button>
+      <button class="btn ghost" id="menuBtn">পেন বদলাবো</button>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div>Flick: <b id="flickCount">0</b></div>
+  <div id="shrinkInfo">৪ চালের পর থেকে অ্যারিনা ছোট হবে</div>
+</div>
+
+<script>
+"use strict";
+
+/* ==========================================================
+   CANVAS / WORLD
+   ========================================================== */
+const stage = document.getElementById('stage');
+const cv    = document.getElementById('cv');
+const ctx   = cv.getContext('2d');
+
+let W = 900, H = 640, DPR = 1;
+
+/* ==========================================================
+   HELPERS
+   ========================================================== */
+const clamp = (v,a,b)=> v<a?a:(v>b?b:v);
+const rand  = (a,b)=> a + Math.random()*(b-a);
+const TAU   = Math.PI*2;
+
+function roundRect(x,y,w,h,r){
+  r = Math.min(r, Math.abs(w)/2, Math.abs(h)/2);
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+/* closest points between two segments (Ericson) */
+function closestSegSeg(p1,q1,p2,q2){
+  const d1x=q1.x-p1.x, d1y=q1.y-p1.y;
+  const d2x=q2.x-p2.x, d2y=q2.y-p2.y;
+  const rx=p1.x-p2.x,  ry=p1.y-p2.y;
+  const a=d1x*d1x+d1y*d1y;
+  const e=d2x*d2x+d2y*d2y;
+  const f=d2x*rx+d2y*ry;
+  const EPS=1e-9;
+  let s,t;
+  if(a<=EPS && e<=EPS){ s=0; t=0; }
+  else if(a<=EPS){ s=0; t=clamp(f/e,0,1); }
+  else{
+    const c=d1x*rx+d1y*ry;
+    if(e<=EPS){ t=0; s=clamp(-c/a,0,1); }
+    else{
+      const b=d1x*d2x+d1y*d2y;
+      const denom=a*e-b*b;
+      s = Math.abs(denom)>EPS ? clamp((b*f-c*e)/denom,0,1) : 0;
+      t = (b*s+f)/e;
+      if(t<0){ t=0; s=clamp(-c/a,0,1); }
+      else if(t>1){ t=1; s=clamp((b-c)/a,0,1); }
+    }
+  }
+  const c1x=p1.x+d1x*s, c1y=p1.y+d1y*s;
+  const c2x=p2.x+d2x*t, c2y=p2.y+d2y*t;
+  return { p1:{x:c1x,y:c1y}, p2:{x:c2x,y:c2y}, d:Math.hypot(c1x-c2x,c1y-c2y) };
+}
+
+/* ==========================================================
+   PEN TYPES
+   ========================================================== */
+const PEN_TYPES = {
+  cheap: {
+    id:'cheap', name:'Cheap Pen', bn:'সস্তা পেন',
+    mass:0.70, len:44, rad:5, power:0.90, restitution:0.62,
+    body:'#e2ecff', cap:'#2f6fed', tip:'#b9c6d8', accent:'#4f8dff',
+    desc:'হালকা ও দ্রুত — কিন্তু ধাক্কা কম',
+    st:{speed:95,power:55,weight:30}
+  },
+  gel: {
+    id:'gel', name:'Gel Pen', bn:'জেল পেন',
+    mass:1.00, len:50, rad:6, power:1.15, restitution:0.50,
+    body:'#ffd0e6', cap:'#8b3dff', tip:'#ffcf5c', accent:'#ff5fa8',
+    desc:'ব্যালান্সড — সব দিকেই ভরসা',
+    st:{speed:72,power:78,weight:60}
+  },
+  fountain: {
+    id:'fountain', name:'Fountain Pen', bn:'ফাউন্টেন পেন',
+    mass:1.50, len:56, rad:7, power:1.50, restitution:0.40,
+    body:'#12182e', cap:'#080c1a', tip:'#d8b25a', accent:'#e0b84f',
+    desc:'ভারী ও শক্তিশালী — ধীর কিন্তু প্রাণঘাতী',
+    st:{speed:55,power:95,weight:95}
+  }
+};
+
+/* ==========================================================
+   GAME STATE
+   ========================================================== */
+const FRICTION_K = 1.8;
+const BASE_IMPULSE = 700;
+
+const G = {
+  state:'menu',            // menu | aim | sim | aiThink | falling | over
+  playerPen:null,
+  aiPen:null,
+  turn:'player',
+  flickCount:0,
+  playerFlicks:0,
+  aiSkill:0.45,
+  arena:null,
+  scale:1,
+  simTime:0,
+  restTimer:0,
+  aiTimer:0,
+  overTimer:0,
+  winner:null,
+  particles:[],
+  shake:0,
+  shrinkFlash:0,
+  pointer:{down:false,sx:0,sy:0,x:0,y:0},
+  selected:'gel',
+  soundOn:true
+};
+
+/* ==========================================================
+   PEN CLASS
+   ========================================================== */
+class Pen{
+  constructor(cfg,x,y,angle,isAI,scale){
+    this.cfg  = cfg;
+    this.isAI = isAI;
+    this.x = x; this.y = y; this.a = angle;
+    this.vx=0; this.vy=0; this.va=0;
+    this.m  = cfg.mass;
+    this.r  = cfg.rad * scale;
+    this.hl = cfg.len * scale / 2;
+    this.I  = this.m * (cfg.len*scale)*(cfg.len*scale) / 12;
+    this.alive = true;
+    this.fall  = 0;
+    this.pulse = 0;
+  }
+  ends(){
+    const c=Math.cos(this.a), s=Math.sin(this.a);
+    return [
+      {x:this.x-c*this.hl, y:this.y-s*this.hl},
+      {x:this.x+c*this.hl, y:this.y+s*this.hl}
+    ];
+  }
+}
+
+/* ==========================================================
+   RESIZE
+   ========================================================== */
+function resize(){
+  const rect = stage.getBoundingClientRect();
+  const nw = Math.max(220, rect.width);
+  const nh = Math.max(220, rect.height);
+  const oldW = W, oldH = H;
+
+  W = nw; H = nh;
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+  cv.width  = Math.round(nw*DPR);
+  cv.height = Math.round(nh*DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+
+  if (G.arena && oldW>1 && oldH>1){
+    const rx = W/oldW, ry = H/oldH;
+    G.arena.x*=rx; G.arena.y*=ry; G.arena.w*=rx; G.arena.h*=ry;
+    if(G.playerPen){ G.playerPen.x*=rx; G.playerPen.y*=ry; }
+    if(G.aiPen){ G.aiPen.x*=rx; G.aiPen.y*=ry; }
+  }
+}
+new ResizeObserver(resize).observe(stage);
+
+/* ==========================================================
+   AUDIO (tiny synth)
+   ========================================================== */
+let actx = null;
+function sfx(type){
+  if(!G.soundOn) return;
+  try{
+    if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==='suspended') actx.resume();
+    const t = actx.currentTime;
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.connect(g); g.connect(actx.destination);
+    if(type==='hit'){
+      o.type='square';
+      o.frequency.setValueAtTime(200,t);
+      o.frequency.exponentialRampToValueAtTime(55,t+0.13);
+      g.gain.setValueAtTime(0.09,t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.16);
+      o.start(t); o.stop(t+0.17);
+    } else if(type==='flick'){
+      o.type='sine';
+      o.frequency.setValueAtTime(720,t);
+      o.frequency.exponentialRampToValueAtTime(240,t+0.09);
+      g.gain.setValueAtTime(0.05,t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.11);
+      o.start(t); o.stop(t+0.12);
+    } else if(type==='fall'){
+      o.type='sawtooth';
+      o.frequency.setValueAtTime(340,t);
+      o.frequency.exponentialRampToValueAtTime(50,t+0.5);
+      g.gain.setValueAtTime(0.07,t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.55);
+      o.start(t); o.stop(t+0.56);
+    } else if(type==='shrink'){
+      o.type='triangle';
+      o.frequency.setValueAtTime(160,t);
+      o.frequency.linearRampToValueAtTime(420,t+0.18);
+      g.gain.setValueAtTime(0.06,t);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.22);
+      o.start(t); o.stop(t+0.23);
+    }
+  }catch(e){}
+}
+
+/* ==========================================================
+   ARENA
+   ========================================================== */
+function resetArena(){
+  const w = W*0.80, h = H*0.80;
+  G.arena = { x:(W-w)/2, y:(H-h)/2, w, h };
+}
+
+function shrinkArena(){
+  const a = G.arena;
+  const nw = Math.max(W*0.30, a.w*0.92);
+  const nh = Math.max(H*0.30, a.h*0.92);
+  a.x += (a.w-nw)/2; a.y += (a.h-nh)/2;
+  a.w = nw; a.h = nh;
+
+  for(const p of [G.playerPen, G.aiPen]){
+    if(!p) continue;
+    const pad = p.r + 8;
+    p.x = clamp(p.x, a.x+pad, a.x+a.w-pad);
+    p.y = clamp(p.y, a.y+pad, a.y+a.h-pad);
+    p.vx *= 0.4; p.vy *= 0.4;
+  }
+  G.shrinkFlash = 1;
+  sfx('shrink');
+  showToast('Arena chhoto holo!');
+}
+
+/* ==========================================================
+   START / RESET
+   ========================================================== */
+function startGame(){
+  resize();
+  resetArena();
+
+  G.scale = clamp(Math.min(W,H)/600, 0.62, 1.25);
+
+  G.flickCount = 0;
+  G.playerFlicks = 0;
+  G.aiSkill = 0.45;
+  G.particles = [];
+  G.shake = 0;
+  G.shrinkFlash = 0;
+  G.winner = null;
+  G.overTimer = 0;
+  G.simTime = 0;
+  G.restTimer = 0;
+
+  const cfg = PEN_TYPES[G.selected];
+  const a = G.arena;
+
+  G.playerPen = new Pen(cfg, W/2, a.y + a.h*0.76, -Math.PI/2, false, G.scale);
+  G.aiPen     = new Pen(cfg, W/2, a.y + a.h*0.24,  Math.PI/2, true,  G.scale);
+
+  G.turn = 'player';
+  G.state = 'aim';
+
+  document.getElementById('dotYou').style.background = cfg.accent;
+  document.getElementById('dotYou').style.color      = cfg.accent;
+  document.getElementById('dotAi').style.background  = cfg.accent;
+  document.getElementById('dotAi').style.color       = cfg.accent;
+
+  document.getElementById('menuOverlay').classList.add('hidden');
+  document.getElementById('overOverlay').classList.add('hidden');
+
+  updateHUD();
+}
+
+/* ==========================================================
+   HUD
+   ========================================================== */
+function updateHUD(){
+  const chipYou = document.getElementById('chipYou');
+  const chipAi  = document.getElementById('chipAi');
+  const msg     = document.getElementById('turnMsg');
+
+  chipYou.classList.toggle('active', G.turn==='player' && G.state!=='over');
+  chipAi.classList.toggle('active',  G.turn==='ai'     && G.state!=='over');
+
+  if(G.state==='menu')      msg.textContent = 'পেন বেছে নাও';
+  else if(G.state==='over') msg.textContent = 'ম্যাচ শেষ';
+  else if(G.state==='falling') msg.textContent = 'পেন পড়ে গেল!';
+  else if(G.state==='aiThink') msg.textContent = 'CPU ভাবছে...';
+  else if(G.turn==='player')   msg.textContent = 'তোমার চাল — টেনে ছাড়ো';
+  else                         msg.textContent = 'CPU এর চাল';
+
+  document.getElementById('flickCount').textContent = G.flickCount;
+
+  const si = document.getElementById('shrinkInfo');
+  if(G.flickCount < 8){
+    si.textContent = `অ্যারিনা ছোট হবে আরও ${8-G.flickCount} চাল পরে`;
+  } else {
+    const rem = 2 - (G.flickCount % 2);
+    si.textContent = `পরের ছোটকরণ: ${rem} চাল পরে`;
+  }
+}
+
+let toastTimer = null;
+function showToast(text){
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+/* ==========================================================
+   PHYSICS
+   ========================================================== */
+function doFlick(pen, dx, dy, power){
+  const c = pen.cfg;
+  const J = BASE_IMPULSE * G.scale * power * c.power;
+  pen.vx += dx * J / c.mass;
+  pen.vy += dy * J / c.mass;
+  pen.va += rand(-1.6, 1.6) * power;
+
+  G.state = 'sim';
+  G.simTime = 0;
+  G.restTimer = 0;
+  sfx('flick');
+  updateHUD();
+}
+
+function resolvePens(){
+  const A = G.playerPen, B = G.aiPen;
+  if(!A || !B || !A.alive || !B.alive) return;
+
+  const eA = A.ends(), eB = B.ends();
+  const res = closestSegSeg(eA[0], eA[1], eB[0], eB[1]);
+  const minD = A.r + B.r;
+  if(res.d >= minD) return;
+
+  let nx, ny;
+  if(res.d < 1e-4){
+    const dx = B.x-A.x, dy = B.y-A.y;
+    const dl = Math.hypot(dx,dy) || 1;
+    nx = dx/dl; ny = dy/dl;
+  }else{
+    nx = (res.p2.x-res.p1.x)/res.d;
+    ny = (res.p2.y-res.p1.y)/res.d;
+  }
+
+  const cpAx = res.p1.x + nx*A.r, cpAy = res.p1.y + ny*A.r;
+  const cpBx = res.p2.x - nx*B.r, cpBy = res.p2.y - ny*B.r;
+  const cpx = (cpAx+cpBx)/2, cpy = (cpAy+cpBy)/2;
+
+  const rAx = cpx-A.x, rAy = cpy-A.y;
+  const rBx = cpx-B.x, rBy = cpy-B.y;
+
+  const vAx = A.vx - A.va*rAy, vAy = A.vy + A.va*rAx;
+  const vBx = B.vx - B.va*rBy, vBy = B.vy + B.va*rBx;
+
+  const rvx = vBx-vAx, rvy = vBy-vAy;
+  const vn  = rvx*nx + rvy*ny;
+
+  const e = Math.min(A.cfg.restitution, B.cfg.restitution);
+  const rnA = rAx*ny - rAy*nx;
+  const rnB = rBx*ny - rBy*nx;
+  const invSum = 1/A.m + 1/B.m + rnA*rnA/A.I + rnB*rnB/B.I;
+
+  if(vn < 0){
+    const j = -(1+e)*vn / invSum;
+
+    A.vx -= j*nx/A.m; A.vy -= j*ny/A.m;
+    A.va -= (rAx*(j*ny) - rAy*(j*nx))/A.I;
+    B.vx += j*nx/B.m; B.vy += j*ny/B.m;
+    B.va += (rBx*(j*ny) - rBy*(j*nx))/B.I;
+
+    // friction
+    const tx = -ny, ty = nx;
+    const vt = rvx*tx + rvy*ty;
+    const rtA = rAx*ty - rAy*tx;
+    const rtB = rBx*ty - rBy*tx;
+    const invSumT = 1/A.m + 1/B.m + rtA*rtA/A.I + rtB*rtB/B.I;
+    let jt = -vt / invSumT;
+    const mu = 0.35;
+    jt = clamp(jt, -mu*j, mu*j);
+
+    A.vx -= jt*tx/A.m; A.vy -= jt*ty/A.m;
+    A.va -= (rAx*(jt*ty) - rAy*(jt*tx))/A.I;
+    B.vx += jt*tx/B.m; B.vy += jt*ty/B.m;
+    B.va += (rBx*(jt*ty) - rBy*(jt*tx))/B.I;
+
+    if(j > 220){
+      const k = clamp(j/2200, 0, 1);
+      G.shake = Math.max(G.shake, 3 + 11*k);
+      spawnBurst(cpx, cpy, '#ffe8a3', 5 + Math.floor(12*k));
+      sfx('hit');
+    }
+  }
+
+  // positional correction
+  const overlap = minD - res.d;
+  if(overlap > 0){
+    const corr = overlap*0.7;
+    const tot = 1/A.m + 1/B.m;
+    A.x -= nx*corr*(1/A.m)/tot;
+    A.y -= ny*corr*(1/A.m)/tot;
+    B.x += nx*corr*(1/B.m)/tot;
+    B.y += ny*corr*(1/B.m)/tot;
+  }
+}
+
+function insideArena(p){
+  const a = G.arena;
+  return p.x >= a.x && p.x <= a.x+a.w && p.y >= a.y && p.y <= a.y+a.h;
+}
+
+function checkFalls(){
+  for(const p of [G.playerPen, G.aiPen]){
+    if(!p || !p.alive) continue;
+    if(!insideArena(p)){
+      p.alive = false;
+      p.fall = 0;
+      spawnBurst(p.x, p.y, p.cfg.accent, 20);
+      G.shake = Math.max(G.shake, 14);
+      sfx('fall');
+    }
+  }
+
+  if(G.winner === null && (!G.playerPen.alive || !G.aiPen.alive)){
+    if(!G.playerPen.alive && !G.aiPen.alive) G.winner = 'draw';
+    else if(!G.playerPen.alive) G.winner = 'ai';
+    else G.winner = 'player';
+    G.overTimer = 0;
+    G.state = 'falling';
+    updateHUD();
+  }
+}
+
+function substep(h){
+  for(const p of [G.playerPen, G.aiPen]){
+    if(!p || !p.alive) continue;
+    p.x += p.vx*h;
+    p.y += p.vy*h;
+    p.a += p.va*h;
+
+    const damp = Math.exp(-FRICTION_K*h);
+    p.vx *= damp; p.vy *= damp;
+    p.va *= Math.exp(-3.6*h);
+
+    if(Math.hypot(p.vx,p.vy) < 6){ p.vx = 0; p.vy = 0; }
+    if(Math.abs(p.va) < 0.09) p.va = 0;
+  }
+
+  resolvePens();
+  checkFalls();
+}
+
+function simulate(dt){
+  const steps = 4;
+  const h = dt/steps;
+  for(let i=0;i<steps;i++){
+    if(G.state !== 'sim') break;
+    substep(h);
+  }
+  if(G.state !== 'sim') return;
+
+  G.simTime += dt;
+
+  const sA = Math.hypot(G.playerPen.vx,G.playerPen.vy) + Math.abs(G.playerPen.va)*30;
+  const sB = Math.hypot(G.aiPen.vx,G.aiPen.vy)       + Math.abs(G.aiPen.va)*30;
+
+  if(sA < 26 && sB < 26) G.restTimer += dt;
+  else G.restTimer = 0;
+
+  if(G.restTimer > 0.28 || G.simTime > 7) endTurn();
+}
+
+/* ==========================================================
+   TURN FLOW
+   ========================================================== */
+function endTurn(){
+  if(G.state !== 'sim') return;
+
+  G.flickCount++;
+
+  if(G.flickCount >= 8 && G.flickCount % 2 === 0){
+    shrinkArena();
+  }
+
+  if(G.turn === 'player'){
+    G.turn = 'ai';
+    G.state = 'aiThink';
+    G.aiTimer = 0.75 + Math.random()*0.45;
+  }else{
+    G.turn = 'player';
+    G.state = 'aim';
+  }
+  updateHUD();
+}
+
+/* ==========================================================
+   AI
+   ========================================================== */
+function updateAI(dt){
+  G.aiTimer -= dt;
+  if(G.aiTimer <= 0) performAI();
+}
+
+function performAI(){
+  const me = G.aiPen, foe = G.playerPen, a = G.arena;
+  if(!me || !foe) return;
+
+  // --- 1. nearest edge to the foe -> push direction ---
+  const edges = [
+    {d: foe.x - a.x,          nx:-1, ny: 0},
+    {d: a.x + a.w - foe.x,    nx: 1, ny: 0},
+    {d: foe.y - a.y,          nx: 0, ny:-1},
+    {d: a.y + a.h - foe.y,    nx: 0, ny: 1}
+  ].sort((p,q)=> p.d - q.d);
+
+  const pushX = edges[0].nx, pushY = edges[0].ny;
+
+  // --- 2. ghost-ball aiming point ---
+  const cd = me.r + foe.r + 3;
+  let gx = foe.x - pushX*cd;
+  let gy = foe.y - pushY*cd;
+
+  let dx = gx - me.x, dy = gy - me.y;
+  let dist = Math.hypot(dx,dy);
+  if(dist < 8){
+    dx = foe.x - me.x; dy = foe.y - me.y;
+    dist = Math.hypot(dx,dy) || 1;
+  }
+  dx /= dist; dy /= dist;
+
+  // --- 3. power needed to cover the distance ---
+  const BASE = BASE_IMPULSE * G.scale;
+  let power = clamp((dist * 1.22 * FRICTION_K * me.cfg.mass) / (BASE * me.cfg.power), 0.30, 1.0);
+
+  // --- 4. self preservation: don't slide off the bench ---
+  const v0 = power * BASE * me.cfg.power / me.cfg.mass;
+  const travel = v0 / FRICTION_K;
+  const pad = me.r + 12;
+
+  // max safe travel along (dx,dy)
+  let maxT = travel;
+  if(dx > 1e-5)      maxT = Math.min(maxT, (a.x + a.w - pad - me.x)/dx);
+  else if(dx < -1e-5) maxT = Math.min(maxT, (a.x + pad - me.x)/dx);
+  if(dy > 1e-5)      maxT = Math.min(maxT, (a.y + a.h - pad - me.y)/dy);
+  else if(dy < -1e-5) maxT = Math.min(maxT, (a.y + pad - me.y)/dy);
+
+  if(maxT < travel && maxT > 0){
+    power = clamp(power * (maxT/travel) * 0.96, 0.18, 1.0);
+  }
+
+  // --- 5. adaptive error: worse early, sharper as it "reads" you ---
+  const err = 0.52 * (1 - G.aiSkill);
+  const ang = rand(-err, err);
+  const cs = Math.cos(ang), sn = Math.sin(ang);
+  const ndx = dx*cs - dy*sn;
+  const ndy = dx*sn + dy*cs;
+
+  power = clamp(power * rand(0.92, 1.06), 0.15, 1);
+
+  doFlick(me, ndx, ndy, power);
+}
+
+/* ==========================================================
+   PARTICLES
+   ========================================================== */
+function spawnBurst(x,y,color,n){
+  for(let i=0;i<n;i++){
+    const a = Math.random()*TAU;
+    const sp = rand(60, 340);
+    G.particles.push({
+      x, y,
+      vx: Math.cos(a)*sp,
+      vy: Math.sin(a)*sp,
+      life: 1,
+      color,
+      size: rand(1.8, 4.6)
+    });
+  }
+}
+
+function updateParticles(dt){
+  for(let i=G.particles.length-1;i>=0;i--){
+    const p = G.particles[i];
+    p.x += p.vx*dt;
+    p.y += p.vy*dt;
+    const d = Math.exp(-3.2*dt);
+    p.vx *= d; p.vy *= d;
+    p.life -= dt*1.7;
+    if(p.life <= 0) G.particles.splice(i,1);
+  }
+}
+
+/* ==========================================================
+   INPUT
+   ========================================================== */
+function getPos(e){
+  const r = cv.getBoundingClientRect();
+  return {
+    x: (e.clientX - r.left) * (W / r.width),
+    y: (e.clientY - r.top)  * (H / r.height)
+  };
+}
+
+cv.addEventListener('pointerdown', e=>{
+  if(G.state !== 'aim') return;
+  e.preventDefault();
+  const p = getPos(e);
+  G.pointer.down = true;
+  G.pointer.sx = p.x; G.pointer.sy = p.y;
+  G.pointer.x  = p.x; G.pointer.y  = p.y;
+  try{ cv.setPointerCapture(e.pointerId); }catch(_){}
+});
+
+cv.addEventListener('pointermove', e=>{
+  if(!G.pointer.down) return;
+  e.preventDefault();
+  const p = getPos(e);
+  G.pointer.x = p.x; G.pointer.y = p.y;
+});
+
+function releasePointer(e){
+  if(!G.pointer.down) return;
+  G.pointer.down = false;
+  if(G.state !== 'aim') return;
+
+  const dx = G.pointer.x - G.pointer.sx;
+  const dy = G.pointer.y - G.pointer.sy;
+  const len = Math.hypot(dx,dy);
+  if(len < 14) return;
+
+  const power = clamp(len / (140*G.scale), 0.14, 1);
+  doFlick(G.playerPen, dx/len, dy/len, power);
+
+  G.playerFlicks++;
+  G.aiSkill = clamp(0.45 + G.playerFlicks*0.075, 0.45, 0.90);
+  updateHUD();
+}
+cv.addEventListener('pointerup', releasePointer);
+cv.addEventListener('pointercancel', ()=>{ G.pointer.down = false; });
+cv.addEventListener('contextmenu', e=>e.preventDefault());
+
+/* ==========================================================
+   RENDER
+   ========================================================== */
+function drawBackground(){
+  const g = ctx.createRadialGradient(W*0.5, -H*0.15, 0, W*0.5, H*0.4, Math.max(W,H)*1.05);
+  g.addColorStop(0,   '#2b2058');
+  g.addColorStop(0.35,'#15112b');
+  g.addColorStop(0.72,'#0a0715');
+  g.addColorStop(1,   '#04030a');
+  ctx.fillStyle = g;
+  ctx.fillRect(-40,-40,W+80,H+80);
+
+  // faint grid dots
+  ctx.save();
+  ctx.globalAlpha = 0.055;
+  ctx.fillStyle = '#a78bfa';
+  const step = 42;
+  for(let x=step/2; x<W; x+=step){
+    for(let y=step/2; y<H; y+=step){
+      ctx.beginPath();
+      ctx.arc(x,y,1.1,0,TAU);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+function drawArena(){
+  const a = G.arena;
+  ctx.save();
+
+  // outer glow
+  ctx.shadowColor = G.shrinkFlash>0
+    ? `rgba(255,80,120,${0.25+0.5*G.shrinkFlash})`
+    : 'rgba(255,170,80,0.28)';
+  ctx.shadowBlur = 46;
+
+  roundRect(a.x, a.y, a.w, a.h, 18);
+  const g = ctx.createLinearGradient(a.x, a.y, a.x+a.w*0.55, a.y+a.h);
+  g.addColorStop(0,    '#c9a06a');
+  g.addColorStop(0.42, '#b4854f');
+  g.addColorStop(1,    '#8a6236');
+  ctx.fillStyle = g;
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
+  ctx.shadowColor = 'transparent';
+
+  // grain + vignette (clipped)
+  ctx.save();
+  roundRect(a.x, a.y, a.w, a.h, 18);
+  ctx.clip();
+
+  ctx.strokeStyle = 'rgba(92,56,20,0.13)';
+  ctx.lineWidth = 1.4;
+  const lines = 26;
+  for(let i=0;i<lines;i++){
+    const yy = a.y + (i+0.5)*(a.h/lines);
+    ctx.beginPath();
+    ctx.moveTo(a.x-12, yy);
+    for(let x=a.x; x<=a.x+a.w+14; x+=26){
+      ctx.lineTo(x, yy + Math.sin(x*0.021 + i*1.7)*3.4 + Math.sin(x*0.006+i)*2);
+    }
+    ctx.stroke();
+  }
+
+  const rg = ctx.createRadialGradient(
+    a.x+a.w/2, a.y+a.h/2, Math.min(a.w,a.h)*0.18,
+    a.x+a.w/2, a.y+a.h/2, Math.max(a.w,a.h)*0.78
+  );
+  rg.addColorStop(0,'rgba(0,0,0,0)');
+  rg.addColorStop(1,'rgba(38,20,0,0.42)');
+  ctx.fillStyle = rg;
+  ctx.fillRect(a.x, a.y, a.w, a.h);
+
+  // top sheen
+  const sheen = ctx.createLinearGradient(a.x, a.y, a.x, a.y+a.h*0.5);
+  sheen.addColorStop(0,'rgba(255,235,200,0.22)');
+  sheen.addColorStop(1,'rgba(255,235,200,0)');
+  ctx.fillStyle = sheen;
+  ctx.fillRect(a.x, a.y, a.w, a.h*0.5);
+
+  ctx.restore();
+
+  // border
+  roundRect(a.x, a.y, a.w, a.h, 18);
+  if(G.shrinkFlash > 0){
+    ctx.strokeStyle = `rgba(255,90,130,${0.55+0.45*G.shrinkFlash})`;
+    ctx.lineWidth = 3 + 3*G.shrinkFlash;
+    ctx.shadowColor = 'rgba(255,90,130,0.9)';
+    ctx.shadowBlur = 26*G.shrinkFlash;
+  }else{
+    ctx.strokeStyle = 'rgba(255,214,160,0.62)';
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = 'rgba(255,190,110,0.45)';
+    ctx.shadowBlur = 14;
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawPen(p){
+  if(!p) return;
+  const dead = !p.alive;
+  if(dead && p.fall >= 1) return;
+
+  const c = p.cfg;
+  const hl = p.hl, r = p.r;
+  const s  = dead ? Math.max(0.001, 1 - p.fall) : 1;
+
+  ctx.save();
+  ctx.globalAlpha = dead ? Math.max(0, 1-p.fall) : 1;
+  ctx.translate(p.x, p.y);
+  ctx.rotate(p.a);
+  ctx.scale(s,s);
+
+  /* shadow */
+  ctx.save();
+  ctx.translate(3, 6);
+  ctx.globalAlpha *= 0.30;
+  ctx.fillStyle = '#1a0e00';
+  roundRect(-hl, -r, hl*2, r*2, r);
+  ctx.fill();
+  ctx.restore();
+
+  /* body */
+  roundRect(-hl, -r, hl*2, r*2, r);
+  ctx.fillStyle = c.body;
+  ctx.fill();
+
+  /* cap */
+  ctx.save();
+  roundRect(-hl, -r, hl*2, r*2, r);
+  ctx.clip();
+  ctx.fillStyle = c.cap;
+  ctx.fillRect(-hl-2, -r-2, hl*0.78, r*2+4);
+
+  // gold ring on cap end
+  ctx.fillStyle = c.accent;
+  ctx.globalAlpha = 0.85;
+  ctx.fillRect(-hl + hl*0.78 - 2.5, -r-2, 2.5, r*2+4);
+  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  /* gloss */
+  const hg = ctx.createLinearGradient(0,-r,0,r);
+  hg.addColorStop(0,   'rgba(255,255,255,0.55)');
+  hg.addColorStop(0.30,'rgba(255,255,255,0.10)');
+  hg.addColorStop(0.68,'rgba(0,0,0,0.06)');
+  hg.addColorStop(1,   'rgba(0,0,0,0.34)');
+  roundRect(-hl,-r,hl*2,r*2,r);
+  ctx.fillStyle = hg;
+  ctx.fill();
+
+  /* nib / tip */
+  ctx.beginPath();
+  ctx.moveTo(hl - r*0.55, -r*0.92);
+  ctx.lineTo(hl + r*1.7,   0);
+  ctx.lineTo(hl - r*0.55,  r*0.92);
+  ctx.closePath();
+  ctx.fillStyle = c.tip;
+  ctx.fill();
+
+  /* clip */
+  ctx.beginPath();
+  ctx.moveTo(-hl + hl*0.22, -r*0.95);
+  ctx.lineTo(hl*0.55,       -r*0.95);
+  ctx.lineTo(hl*0.55,       -r*0.45);
+  ctx.lineTo(-hl + hl*0.22, -r*0.45);
+  ctx.closePath();
+  ctx.fillStyle = c.accent;
+  ctx.globalAlpha = 0.55;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  /* outline */
+  roundRect(-hl,-r,hl*2,r*2,r);
+  ctx.strokeStyle = 'rgba(0,0,0,0.28)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawPlayerRing(t){
+  const p = G.playerPen;
+  if(!p || !p.alive) return;
+  const pulse = 0.5 + 0.5*Math.sin(t*4);
+  ctx.save();
+  ctx.globalAlpha = 0.32 + 0.28*pulse;
+  ctx.strokeStyle = '#6ee7ff';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6,7]);
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, p.hl + p.r + 12 + pulse*4, 0, TAU);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawAim(t){
+  if(G.state !== 'aim' || !G.pointer.down) return;
+  const p = G.playerPen;
+  if(!p) return;
+
+  const dx = G.pointer.x - G.pointer.sx;
+  const dy = G.pointer.y - G.pointer.sy;
+  const len = Math.hypot(dx,dy);
+  if(len < 10) return;
+
+  const nx = dx/len, ny = dy/len;
+  const power = clamp(len/(140*G.scale), 0.14, 1);
+
+  const v0 = power * BASE_IMPULSE * G.scale * p.cfg.power / p.cfg.mass;
+  const travel = v0 / FRICTION_K;
+
+  // drag line (start -> pointer)
+  ctx.save();
+  ctx.setLineDash([5,7]);
+  ctx.lineWidth = 1.6;
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.beginPath();
+  ctx.moveTo(G.pointer.sx, G.pointer.sy);
+  ctx.lineTo(G.pointer.x,  G.pointer.y);
+  ctx.stroke();
+  ctx.restore();
+
+  // trajectory
+  ctx.save();
+  ctx.setLineDash([13, 11]);
+  ctx.lineDashOffset = -t*45;
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = `rgba(110,231,255,${0.28 + 0.55*power})`;
+  ctx.shadowColor = 'rgba(110,231,255,0.85)';
+  ctx.shadowBlur = 16;
+  ctx.beginPath();
+  ctx.moveTo(p.x, p.y);
+  ctx.lineTo(p.x + nx*travel, p.y + ny*travel);
+  ctx.stroke();
+  ctx.restore();
+
+  // arrow head
+  const ex = p.x + nx*travel, ey = p.y + ny*travel;
+  const ah = 14 + 8*power;
+  ctx.save();
+  ctx.translate(ex, ey);
+  ctx.rotate(Math.atan2(ny,nx));
+  ctx.fillStyle = `rgba(110,231,255,${0.4 + 0.55*power})`;
+  ctx.shadowColor = 'rgba(110,231,255,0.9)';
+  ctx.shadowBlur = 18;
+  ctx.beginPath();
+  ctx.moveTo(ah*0.6, 0);
+  ctx.lineTo(-ah*0.45, ah*0.52);
+  ctx.lineTo(-ah*0.45, -ah*0.52);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // power arc near the pen
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+  ctx.beginPath();
+  ctx.arc(0,0, p.hl + p.r + 22, -Math.PI*0.75, Math.PI*0.75);
+  ctx.stroke();
+
+  const pg = ctx.createLinearGradient(-40,-40,40,40);
+  pg.addColorStop(0,'#7c5cff');
+  pg.addColorStop(1,'#22d3ee');
+  ctx.strokeStyle = pg;
+  ctx.shadowColor = 'rgba(124,92,255,0.9)';
+  ctx.shadowBlur = 14;
+  ctx.beginPath();
+  ctx.arc(0,0, p.hl + p.r + 22, -Math.PI*0.75, -Math.PI*0.75 + Math.PI*1.5*power);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawParticles(){
+  for(const p of G.particles){
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, p.life);
+    ctx.fillStyle = p.color;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size*p.life, 0, TAU);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function render(t){
+  ctx.save();
+
+  if(G.shake > 0.15){
+    ctx.translate(rand(-1,1)*G.shake, rand(-1,1)*G.shake);
+    G.shake *= 0.88;
+  }else{
+    G.shake = 0;
+  }
+
+  drawBackground();
+
+  if(G.arena){
+    drawArena();
+
+    if(G.state === 'aim') drawPlayerRing(t);
+
+    drawParticles();
+
+    if(G.playerPen) drawPen(G.playerPen);
+    if(G.aiPen)     drawPen(G.aiPen);
+
+    drawAim(t);
+  }
+
+  ctx.restore();
+}
+
+/* ==========================================================
+   MAIN LOOP
+   ========================================================== */
+let last = performance.now();
+let elapsed = 0;
+
+function loop(now){
+  let dt = (now - last)/1000;
+  last = now;
+  if(dt > 0.05) dt = 0.05;
+  elapsed += dt;
+
+  if(G.state === 'sim'){
+    simulate(dt);
+  }else if(G.state === 'aiThink'){
+    updateAI(dt);
+  }else if(G.state === 'falling'){
+    G.overTimer += dt;
+    for(const p of [G.playerPen, G.aiPen]){
+      if(p && !p.alive) p.fall = Math.min(1, p.fall + dt*1.5);
+    }
+    if(G.overTimer > 1.05) gameOver();
+  }
+
+  updateParticles(dt);
+  if(G.shrinkFlash > 0) G.shrinkFlash = Math.max(0, G.shrinkFlash - dt*1.6);
+
+  render(elapsed);
+  requestAnimationFrame(loop);
+}
+
+/* ==========================================================
+   GAME OVER
+   ========================================================== */
+function gameOver(){
+  if(G.state === 'over') return;
+  G.state = 'over';
+  updateHUD();
+
+  const tEl = document.getElementById('resTitle');
+  const sEl = document.getElementById('resSub');
+
+  tEl.className = 'resultTitle';
+  if(G.winner === 'player'){
+    tEl.classList.add('win');
+    tEl.textContent = 'YOU WIN! 🏆';
+    sEl.textContent = 'দুর্দান্ত ফ্লিক! CPU এর পেন বেঞ্চ থেকে পড়ে গেছে।';
+  }else if(G.winner === 'ai'){
+    tEl.classList.add('lose');
+    tEl.textContent = 'CPU WINS 😤';
+    sEl.textContent = 'তোমার পেন পড়ে গেছে। আবার চেষ্টা করো!';
+  }else{
+    tEl.classList.add('draw');
+    tEl.textContent = 'DRAW 🤝';
+    sEl.textContent = 'দুটো পেনই পড়ে গেছে। এটা কীভাবে হলো!';
+  }
+
+  document.getElementById('overOverlay').classList.remove('hidden');
+}
+
+/* ==========================================================
+   MENU BUILD
+   ========================================================== */
+function penIconSVG(cfg){
+  return `<svg class="picon" viewBox="0 0 64 64">
+    <defs>
+      <linearGradient id="g_${cfg.id}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>
+        <stop offset="35%" stop-color="#ffffff" stop-opacity="0.05"/>
+        <stop offset="100%" stop-color="#000000" stop-opacity="0.35"/>
+      </linearGradient>
+    </defs>
+    <rect x="10" y="26" width="40" height="12" rx="6" fill="${cfg.body}"/>
+    <rect x="10" y="26" width="15" height="12" rx="6" fill="${cfg.cap}"/>
+    <rect x="23.5" y="26" width="2" height="12" fill="${cfg.accent}" opacity="0.85"/>
+    <rect x="10" y="26" width="40" height="12" rx="6" fill="url(#g_${cfg.id})"/>
+    <path d="M50 28 L60 32 L50 36 Z" fill="${cfg.tip}"/>
+    <rect x="18" y="26.8" width="16" height="2" rx="1" fill="${cfg.accent}" opacity="0.6"/>
+  </svg>`;
+}
+
+function buildMenu(){
+  const wrap = document.getElementById('penCards');
+  wrap.innerHTML = '';
+  Object.values(PEN_TYPES).forEach(cfg=>{
+    const btn = document.createElement('button');
+    btn.className = 'card' + (G.selected === cfg.id ? ' sel' : '');
+    btn.dataset.pen = cfg.id;
+    btn.innerHTML = `
+      ${penIconSVG(cfg)}
+      <div class="cname">${cfg.name}</div>
+      <div class="cdesc">${cfg.desc}</div>
+      <div class="stat"><span>Speed</span><div class="bar"><i style="width:${cfg.st.speed}%"></i></div></div>
+      <div class="stat"><span>Power</span><div class="bar"><i style="width:${cfg.st.power}%"></i></div></div>
+      <div class="stat"><span>Weight</span><div class="bar"><i style="width:${cfg.st.weight}%"></i></div></div>
+    `;
+    btn.addEventListener('click', ()=>{
+      G.selected = cfg.id;
+      wrap.querySelectorAll('.card').forEach(c=>c.classList.remove('sel'));
+      btn.classList.add('sel');
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+/* ==========================================================
+   BUTTONS
+   ========================================================== */
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+  startGame();
+});
+
+document.getElementById('againBtn').addEventListener('click', ()=>{
+  document.getElementById('overOverlay').classList.add('hidden');
+  startGame();
+});
+
+document.getElementById('menuBtn').addEventListener('click', ()=>{
+  document.getElementById('overOverlay').classList.add('hidden');
+  document.getElementById('menuOverlay').classList.remove('hidden');
+  G.state = 'menu';
+  G.arena = null;
+  G.playerPen = null;
+  G.aiPen = null;
+  updateHUD();
+});
+
+/* ==========================================================
+   BOOT
+   ========================================================== */
+resize();
+buildMenu();
+updateHUD();
+requestAnimationFrame(t=>{ last = t; requestAnimationFrame(loop); });
+</script>
+</body>
+</html>
