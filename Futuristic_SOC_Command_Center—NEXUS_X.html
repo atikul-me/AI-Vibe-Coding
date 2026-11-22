@@ -1,0 +1,390 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEXUS X | SOC Command Center</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap');
+
+:root{
+--bg:#050914;--panel:#0b1424;--border:#1b3449;
+--cyan:#00f5d4;--blue:#38a9ff;--red:#ff4567;
+--yellow:#ffca58;--green:#00e6a0;--text:#d9e9f5;
+--muted:#72869a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Inter,sans-serif;min-height:100vh;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(ellipse at 50% 0%,#0b2d4544,transparent 65%)}
+button,input{font:inherit}
+button{cursor:pointer}
+.layout{display:grid;grid-template-columns:235px 1fr;min-height:100vh}
+.sidebar{background:#080f1d;border-right:1px solid var(--border);padding:24px 15px;position:sticky;top:0;height:100vh}
+.brand{font:800 23px Orbitron;color:var(--cyan);letter-spacing:2px;padding:5px 12px 28px;text-shadow:0 0 15px #00f5d455}
+.brand small{font-size:9px;color:var(--muted);display:block;letter-spacing:4px;margin-top:8px}
+.nav-title{font-size:10px;color:var(--muted);letter-spacing:2px;margin:20px 12px 10px}
+.nav{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border:0;border-radius:7px;background:transparent;color:#91a9bd;text-align:left;font-size:13px;margin:3px 0;transition:.2s}
+.nav:hover,.nav.active{background:#10283a;color:var(--cyan)}
+.nav.active{border-left:3px solid var(--cyan)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 9px var(--green)}
+.sidebar-bottom{position:absolute;bottom:25px;left:25px;color:var(--muted);font-size:10px;line-height:2}
+main{min-width:0;padding:24px 28px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:1px solid var(--border);padding-bottom:19px;flex-wrap:wrap}
+.page-title{font:600 17px Orbitron;letter-spacing:1px}
+.page-title span{color:var(--cyan)}
+.top-right{display:flex;align-items:center;gap:15px;font-size:11px;color:var(--muted)}
+.online{color:var(--green)}
+.clock{color:white;font-family:'Share Tech Mono';font-size:15px}
+.section{display:none;animation:fade .35s ease}
+.section.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.heading{display:flex;justify-content:space-between;align-items:center;margin:25px 0 15px;gap:12px;flex-wrap:wrap}
+.heading h2{font-size:16px;font-weight:600}
+.sub{font-size:11px;color:var(--muted);margin-top:5px}
+.btn{background:#102c3c;border:1px solid #1d5261;color:var(--cyan);padding:9px 13px;border-radius:5px;font-size:11px}
+.btn:hover{background:#164456}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.card{background:linear-gradient(140deg,#101d30,#091321);border:1px solid var(--border);border-radius:9px;padding:17px;min-width:0;transition:.25s}
+.card:hover{border-color:#23718a;transform:translateY(-2px)}
+.card-label{font-size:10px;color:var(--muted);letter-spacing:1.3px}
+.metric{font:600 28px Orbitron;margin:15px 0 7px;color:white}
+.metric.cyan{color:var(--cyan)}
+.metric.red{color:var(--red)}
+.metric.yellow{color:var(--yellow)}
+.metric.green{color:var(--green)}
+.change{font-size:10px;color:var(--muted)}
+.middle{display:grid;grid-template-columns:1.5fr 1fr;gap:14px;margin-top:15px}
+.panel{background:#0b1424;border:1px solid var(--border);border-radius:9px;padding:17px;min-width:0}
+.panel-title{font-size:12px;font-weight:600;margin-bottom:15px;display:flex;justify-content:space-between}
+canvas{width:100%;display:block}
+.chart{height:190px}
+.network{height:245px;position:relative;overflow:hidden;background:radial-gradient(ellipse,#10253a 0%,#08111e 75%);border-radius:7px}
+.network canvas{height:100%}
+.legend{display:flex;gap:14px;font-size:10px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+.legend span:before{content:"";display:inline-block;width:7px;height:7px;background:var(--cyan);border-radius:50%;margin-right:6px}
+.legend span:nth-child(2):before{background:var(--red)}
+.legend span:nth-child(3):before{background:var(--yellow)}
+.bottom{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-top:15px}
+table{width:100%;border-collapse:collapse;font-size:11px;text-align:left}
+th{color:var(--muted);font-weight:500;padding:10px 7px;border-bottom:1px solid var(--border)}
+td{padding:12px 7px;border-bottom:1px solid #17293a}
+tr:last-child td{border:0}
+.badge{padding:4px 7px;border-radius:4px;font-size:9px;background:#263344;color:var(--yellow)}
+.badge.high{background:#481b2a;color:#ff7992}
+.badge.low{background:#10372f;color:#00e6a0}
+.feed{display:flex;flex-direction:column;gap:12px}
+.event{display:flex;gap:10px;font-size:11px;line-height:1.5}
+.event-dot{width:7px;height:7px;border-radius:50%;background:var(--red);margin-top:5px;flex-shrink:0}
+.event-dot.green{background:var(--green)}
+.event small{display:block;color:var(--muted);margin-top:3px}
+.terminal{background:#030914;border:1px solid #174155;border-radius:8px;overflow:hidden}
+.terminal-head{background:#102235;padding:12px 15px;font-size:11px;color:var(--cyan);display:flex;justify-content:space-between}
+.terminal-out{height:260px;overflow:auto;padding:15px;font:12px/1.9 'Share Tech Mono';color:#9eb8ca}
+.terminal-input{display:flex;border-top:1px solid var(--border);padding:12px;gap:10px}
+.terminal-input input{flex:1;min-width:0;background:transparent;border:0;outline:0;color:var(--cyan);font:13px 'Share Tech Mono'}
+.green-text{color:var(--green)}.red-text{color:var(--red)}.cyan-text{color:var(--cyan)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+.filters input,.filters select{background:#101d30;border:1px solid var(--border);padding:9px;color:white;border-radius:5px;font-size:11px}
+.filters input{flex:1;min-width:130px}
+.incident{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.incident p{font-size:11px;color:var(--muted);margin-top:5px}
+.progress{height:5px;background:#1b3040;border-radius:5px;margin-top:12px}
+.progress div{height:100%;background:var(--cyan);border-radius:5px}
+.ai-box{background:linear-gradient(120deg,#102b3d,#111a32);border:1px solid #24576d;border-radius:10px;padding:20px;margin-bottom:15px}
+.ai-box h3{font:600 16px Orbitron;color:var(--cyan);margin-bottom:10px}
+.ai-box p{font-size:12px;color:#9db2c4;line-height:1.8}
+.quick{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}
+.quick button{background:#10283a;border:1px solid #22516a;color:#9de9f1;padding:8px 12px;border-radius:5px;font-size:10px}
+footer{text-align:center;padding:30px;color:#506579;font-size:10px;letter-spacing:2px}
+@media(max-width:900px){.layout{grid-template-columns:65px 1fr}.sidebar{padding:20px 8px}.brand{font-size:0;padding:8px 5px 28px}.brand:before{content:"N";font:800 22px Orbitron;color:var(--cyan)}.brand small,.nav-title,.nav span:not(.dot),.sidebar-bottom{display:none}.nav{justify-content:center;padding:14px 5px}.nav .dot{width:9px;height:9px}.metrics{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){main{padding:17px 12px}.middle,.bottom{grid-template-columns:1fr}.metrics{gap:8px}.card{padding:12px}.metric{font-size:23px}.topbar{align-items:flex-start}.clock{font-size:12px}}
+</style>
+</head>
+
+<body>
+<div class="layout">
+<aside class="sidebar">
+ <div class="brand">NEXUS X<small>SOC COMMAND CENTER</small></div>
+ <div class="nav-title">MAIN MENU</div>
+ <button class="nav active" data-page="dashboard">◈ <span>Dashboard</span></button>
+ <button class="nav" data-page="network">◎ <span>Network Map</span></button>
+ <button class="nav" data-page="threats">⚠ <span>Threat Intelligence</span></button>
+ <button class="nav" data-page="logs">▤ <span>Security Logs</span></button>
+ <button class="nav" data-page="incidents">◉ <span>Incidents</span></button>
+ <div class="nav-title">TOOLS</div>
+ <button class="nav" data-page="terminal">⌘ <span>Terminal</span></button>
+ <button class="nav" data-page="assistant">✧ <span>AI Assistant</span></button>
+ <div class="sidebar-bottom">
+  <span class="dot" style="display:inline-block"></span> ALL SYSTEMS NOMINAL<br>
+  NEXUS X // BUILD 2.0.0
+ </div>
+</aside>
+
+<main>
+<header class="topbar">
+ <div class="page-title">NEXUS <span>/ SECURITY OPERATIONS</span></div>
+ <div class="top-right">
+  <span class="online">● ONLINE</span>
+  <span class="clock" id="clock"></span>
+  <span>ADMIN</span>
+ </div>
+</header>
+
+<!-- DASHBOARD -->
+<section class="section active" id="dashboard">
+ <div class="heading"><div><h2>Security Overview</h2><div class="sub">Global security operations monitoring</div></div><button class="btn" onclick="refresh()">↻ REFRESH</button></div>
+ <div class="metrics">
+  <div class="card"><div class="card-label">THREAT EVENTS</div><div class="metric red" id="threatCount">24</div><div class="change">Simulated event count</div></div>
+  <div class="card"><div class="card-label">SECURITY SCORE</div><div class="metric cyan" id="score">98.4%</div><div class="change">Demo security indicator</div></div>
+  <div class="card"><div class="card-label">ACTIVE INCIDENTS</div><div class="metric yellow" id="incidentCount">03</div><div class="change">Unresolved demo incidents</div></div>
+  <div class="card"><div class="card-label">SYSTEM STATUS</div><div class="metric green" style="font-size:21px">STABLE</div><div class="change">Interface operational</div></div>
+ </div>
+ <div class="middle">
+  <div class="panel"><div class="panel-title">THREAT ACTIVITY <span class="cyan-text">● LIVE DEMO</span></div><canvas id="chart" class="chart"></canvas></div>
+  <div class="panel"><div class="panel-title">NETWORK OVERVIEW</div><div class="network"><canvas id="networkCanvas"></canvas></div><div class="legend"><span>Normal</span><span>Threat</span><span>Unknown</span></div></div>
+ </div>
+ <div class="bottom">
+  <div class="panel"><div class="panel-title">RECENT SECURITY EVENTS</div><div style="overflow:auto"><table><thead><tr><th>TIME</th><th>EVENT</th><th>SEVERITY</th></tr></thead><tbody id="recentTable"></tbody></table></div></div>
+  <div class="panel"><div class="panel-title">LIVE ACTIVITY FEED</div><div class="feed" id="feed"></div></div>
+ </div>
+</section>
+
+<!-- NETWORK -->
+<section class="section" id="network">
+ <div class="heading"><div><h2>Network Visualization</h2><div class="sub">Illustrative topology — no real network discovery</div></div><button class="btn" onclick="networkDraw()">↻ REGENERATE</button></div>
+ <div class="panel"><div class="network" style="height:430px"><canvas id="networkLarge"></canvas></div><div class="legend"><span>Normal Node</span><span>Alert Node</span><span>Unknown Node</span></div></div>
+ <div class="panel" style="margin-top:15px"><h3 class="panel-title">NETWORK SUMMARY</h3><div class="metrics"><div><div class="card-label">NODES</div><div class="metric cyan">12</div></div><div><div class="card-label">CONNECTIONS</div><div class="metric">18</div></div><div><div class="card-label">ALERT NODES</div><div class="metric red">02</div></div><div><div class="card-label">STATUS</div><div class="metric green">DEMO</div></div></div></div>
+</section>
+
+<!-- THREATS -->
+<section class="section" id="threats">
+ <div class="heading"><div><h2>Threat Intelligence</h2><div class="sub">Simulated threat intelligence feed</div></div><span class="badge high">DEMO DATA</span></div>
+ <div class="metrics">
+  <div class="card"><div class="card-label">CRITICAL</div><div class="metric red">02</div></div>
+  <div class="card"><div class="card-label">HIGH</div><div class="metric yellow">05</div></div>
+  <div class="card"><div class="card-label">MEDIUM</div><div class="metric cyan">08</div></div>
+  <div class="card"><div class="card-label">LOW</div><div class="metric green">09</div></div>
+ </div>
+ <div class="panel" style="margin-top:15px"><div class="panel-title">THREAT INDICATORS</div><div style="overflow:auto"><table><thead><tr><th>INDICATOR</th><th>TYPE</th><th>SEVERITY</th><th>STATUS</th></tr></thead><tbody id="threatTable"></tbody></table></div></div>
+</section>
+
+<!-- LOGS -->
+<section class="section" id="logs">
+ <div class="heading"><div><h2>Security Log Analyzer</h2><div class="sub">Search and filter generated sample logs</div></div><button class="btn" onclick="exportLogs()">↓ EXPORT CSV</button></div>
+ <div class="filters"><input id="logSearch" placeholder="Search logs..." oninput="renderLogs()"><select id="logLevel" onchange="renderLogs()"><option value="ALL">All Levels</option><option>INFO</option><option>WARNING</option><option>CRITICAL</option></select></div>
+ <div class="panel"><div style="overflow:auto"><table><thead><tr><th>TIMESTAMP</th><th>LEVEL</th><th>SOURCE</th><th>MESSAGE</th></tr></thead><tbody id="logsTable"></tbody></table></div></div>
+</section>
+
+<!-- INCIDENTS -->
+<section class="section" id="incidents">
+ <div class="heading"><div><h2>Incident Management</h2><div class="sub">Track and resolve simulated security incidents</div></div><button class="btn" onclick="newIncident()">+ NEW INCIDENT</button></div>
+ <div id="incidentList" style="display:grid;gap:12px"></div>
+</section>
+
+<!-- TERMINAL -->
+<section class="section" id="terminal">
+ <div class="heading"><div><h2>Command Terminal</h2><div class="sub">NEXUS X interactive demo environment</div></div><span class="badge low">LOCAL SIMULATION</span></div>
+ <div class="terminal">
+ <div class="terminal-head"><span>root@nexus-x:~</span><span>SESSION ACTIVE</span></div>
+ <div class="terminal-out" id="terminalOut"><div class="green-text">NEXUS X TERMINAL INITIALIZED</div><div>Welcome, operator.</div><div>Type 'help' to see available commands.</div></div>
+ <div class="terminal-input"><span class="cyan-text">❯</span><input id="terminalInput" placeholder="Enter command..." autocomplete="off"><button class="btn" onclick="terminalRun()">RUN</button></div>
+ </div>
+ <div class="quick"><button onclick="terminalRun('help')">HELP</button><button onclick="terminalRun('status')">STATUS</button><button onclick="terminalRun('logs')">LOGS</button><button onclick="terminalRun('threats')">THREATS</button><button onclick="terminalRun('clear')">CLEAR</button></div>
+</section>
+
+<!-- AI ASSISTANT -->
+<section class="section" id="assistant">
+ <div class="heading"><div><h2>NEXUS AI Assistant</h2><div class="sub">Rule-based cybersecurity demo assistant — not a real AI model</div></div><span class="badge low">LOCAL ENGINE</span></div>
+ <div class="ai-box"><h3>✧ NEXUS INTELLIGENCE</h3><p>Welcome, operator. I can explain dashboard metrics, suggest defensive security practices, and help interpret the sample events available in this demo.</p></div>
+ <div class="terminal">
+ <div class="terminal-head">NEXUS ASSISTANT / CHAT</div>
+ <div class="terminal-out" id="chatOut" style="height:300px"><div class="cyan-text">NEXUS: How can I help with your security operations?</div></div>
+ <div class="terminal-input"><input id="chatInput" placeholder="Ask a cybersecurity question..." autocomplete="off"><button class="btn" onclick="chatRun()">SEND</button></div>
+ </div>
+ <div class="quick"><button onclick="ask('What is a SIEM?')">What is SIEM?</button><button onclick="ask('Explain critical alerts')">Critical alerts</button><button onclick="ask('How can I secure my network?')">Network security</button><button onclick="ask('Explain incident response')">Incident response</button></div>
+</section>
+<footer>NEXUS X // CYBER DEFENSE INTERFACE // DEMONSTRATION BUILD</footer>
+</main>
+</div>
+
+<script>
+// CLOCK
+function clock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString()}
+setInterval(clock,1000);clock();
+
+// NAVIGATION
+document.querySelectorAll('.nav[data-page]').forEach(btn=>{
+btn.onclick=()=>{
+ document.querySelectorAll('.nav').forEach(b=>b.classList.remove('active'));
+ document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+ btn.classList.add('active');
+ document.getElementById(btn.dataset.page).classList.add('active');
+ if(btn.dataset.page==='network')networkDraw();
+}
+});
+
+// SAMPLE DATA
+let logs=[
+['INFO','FIREWALL','Firewall policy check completed'],
+['WARNING','AUTH','Multiple failed login attempts detected'],
+['CRITICAL','ENDPOINT','Suspicious activity in demo endpoint'],
+['INFO','SYSTEM','System health check passed'],
+['WARNING','NETWORK','Unusual traffic pattern detected'],
+['INFO','DNS','DNS resolution successful'],
+['CRITICAL','IDS','Simulated intrusion alert generated'],
+['INFO','ACCESS','Administrator session established'],
+['WARNING','AUTH','Unusual login time detected'],
+['INFO','BACKUP','Backup verification completed']
+];
+let incidents=[
+{id:101,title:'Repeated authentication failures',severity:'HIGH',status:'OPEN',desc:'Multiple failed authentication events in sample logs.'},
+{id:102,title:'Suspicious endpoint activity',severity:'CRITICAL',status:'INVESTIGATING',desc:'Sample endpoint event requires analyst review.'},
+{id:103,title:'Unusual network traffic',severity:'MEDIUM',status:'OPEN',desc:'Illustrative traffic anomaly for investigation.'}
+];
+const threats=[
+['198.51.100.23','IPv4','HIGH','DEMO'],
+['203.0.113.17','IPv4','CRITICAL','DEMO'],
+['example.test','DOMAIN','MEDIUM','DEMO'],
+['192.0.2.55','IPv4','LOW','DEMO'],
+['test-indicator.local','DOMAIN','HIGH','DEMO']
+];
+function time(){return new Date().toLocaleTimeString()}
+
+// RECENT EVENTS
+function recent(){
+document.getElementById('recentTable').innerHTML=logs.slice(0,5).map(l=>`<tr><td>${time()}</td><td>${l[2]}</td><td><span class="badge ${l[0]==='CRITICAL'?'high':l[0]==='INFO'?'low':''}">${l[0]}</span></td></tr>`).join('');
+}
+function renderFeed(){
+document.getElementById('feed').innerHTML=logs.slice(0,4).map(l=>`<div class="event"><span class="event-dot ${l[0]==='INFO'?'green':''}"></span><div>${l[2]}<small>${l[1]} · ${time()}</small></div></div>`).join('');
+}
+function renderThreats(){
+document.getElementById('threatTable').innerHTML=threats.map(t=>`<tr><td>${t[0]}</td><td>${t[1]}</td><td><span class="badge ${t[2]==='CRITICAL'?'high':''}">${t[2]}</span></td><td>${t[3]}</td></tr>`).join('');
+}
+function renderLogs(){
+const q=document.getElementById('logSearch').value.toLowerCase();
+const level=document.getElementById('logLevel').value;
+document.getElementById('logsTable').innerHTML=logs.filter(l=>(level==='ALL'||l[0]===level)&&l.join(' ').toLowerCase().includes(q)).map(l=>`<tr><td>${time()}</td><td><span class="badge ${l[0]==='CRITICAL'?'high':l[0]==='INFO'?'low':''}">${l[0]}</span></td><td>${l[1]}</td><td>${l[2]}</td></tr>`).join('')||'<tr><td colspan="4">No matching logs</td></tr>';
+}
+function renderIncidents(){
+document.getElementById('incidentList').innerHTML=incidents.map(i=>`<div class="panel"><div class="incident"><div><b>#${i.id} · ${i.title}</b><p>${i.desc}</p></div><div><span class="badge ${i.severity==='CRITICAL'||i.severity==='HIGH'?'high':''}">${i.severity}</span> <span class="badge low">${i.status}</span></div></div><div class="progress"><div style="width:${i.status==='RESOLVED'?100:i.status==='INVESTIGATING'?55:15}%"></div></div><div class="quick"><button onclick="changeIncident(${i.id})">${i.status==='OPEN'?'INVESTIGATE':i.status==='INVESTIGATING'?'RESOLVE':'REOPEN'}</button></div></div>`).join('');
+document.getElementById('incidentCount').textContent=String(incidents.filter(i=>i.status!=='RESOLVED').length).padStart(2,'0');
+}
+function changeIncident(id){
+const i=incidents.find(x=>x.id===id);
+i.status=i.status==='OPEN'?'INVESTIGATING':i.status==='INVESTIGATING'?'RESOLVED':'OPEN';
+renderIncidents();
+}
+function newIncident(){
+const title=prompt('Enter incident title:');
+if(!title||!title.trim())return;
+incidents.unshift({id:Date.now().toString().slice(-5),title:title.trim(),severity:'MEDIUM',status:'OPEN',desc:'Manually created demo incident.'});
+renderIncidents();
+}
+function exportLogs(){
+const csv=['Level,Source,Message',...logs.map(l=>l.map(x=>'"'+x.replaceAll('"','""')+'"').join(','))].join('\n');
+const a=document.createElement('a');
+a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+a.download='nexus-security-logs.csv';a.click();
+URL.revokeObjectURL(a.href);
+}
+
+// TERMINAL
+const out=document.getElementById('terminalOut');
+function print(text,cls=''){
+const d=document.createElement('div');d.className=cls;d.textContent=text;out.appendChild(d);out.scrollTop=out.scrollHeight;
+}
+function terminalRun(cmd){
+cmd=(cmd||document.getElementById('terminalInput').value).trim().toLowerCase();
+document.getElementById('terminalInput').value='';
+if(!cmd)return;
+print('root@nexus-x:~$ '+cmd,'green-text');
+const responses={
+help:['Available: help, status, logs, threats, incidents, time, clear'],
+status:['NEXUS CORE: ONLINE','Telemetry: SIMULATED','Security interface: OPERATIONAL'],
+logs:[...logs.slice(0,5).map(l=>l.join(' | '))],
+threats:['Threat intelligence feed: DEMO DATA','Indicators available: '+threats.length],
+incidents:['Unresolved incidents: '+incidents.filter(i=>i.status!=='RESOLVED').length],
+time:[new Date().toString()],
+clear:[]
+};
+if(cmd==='clear'){out.innerHTML='';return}
+if(responses[cmd])responses[cmd].forEach(t=>print(t,'cyan-text'));
+else print('Unknown command. Type help.','red-text');
+}
+document.getElementById('terminalInput').addEventListener('keydown',e=>{if(e.key==='Enter')terminalRun()});
+
+// ASSISTANT
+function ask(q){document.getElementById('chatInput').value=q;chatRun()}
+function chatRun(){
+const input=document.getElementById('chatInput');
+const q=input.value.trim();if(!q)return;input.value='';
+const chat=document.getElementById('chatOut');
+function msg(who,text,cls){const d=document.createElement('div');d.style.marginBottom='15px';d.className=cls;d.textContent=who+': '+text;chat.appendChild(d)}
+msg('YOU',q,'');
+const s=q.toLowerCase();
+let answer='I can help with defensive cybersecurity concepts. Try asking about SIEM, alerts, network security or incident response.';
+if(s.includes('siem'))answer='SIEM stands for Security Information and Event Management. It collects and correlates security logs from different systems to help analysts detect and investigate incidents.';
+else if(s.includes('critical')||s.includes('alert'))answer='Prioritize critical alerts by validating the event, checking affected assets, reviewing supporting logs and following your incident response process. Do not assume every alert is a confirmed breach.';
+else if(s.includes('network'))answer='Use network segmentation, secure configurations, regular patching, access control, encrypted management and continuous monitoring. Maintain an approved asset inventory.';
+else if(s.includes('incident'))answer='A typical incident response lifecycle includes preparation, detection and analysis, containment, eradication, recovery and lessons learned.';
+else if(s.includes('firewall'))answer='A firewall controls network traffic based on defined rules. Review rules regularly, apply least privilege and monitor denied and permitted connections.';
+else if(s.includes('log'))answer='Security logs record events. Useful fields include timestamps, source, event type, user context and severity. Centralize logs and protect their integrity.';
+setTimeout(()=>{msg('NEXUS',answer,'cyan-text');chat.scrollTop=chat.scrollHeight},350);
+chat.scrollTop=chat.scrollHeight;
+}
+document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')chatRun()});
+
+// CHART
+function drawChart(){
+const c=document.getElementById('chart'),ctx=c.getContext('2d');
+const w=c.width=c.clientWidth*devicePixelRatio,h=c.height=c.clientHeight*devicePixelRatio;
+ctx.scale(devicePixelRatio,devicePixelRatio);
+const W=c.clientWidth,H=c.clientHeight;
+ctx.strokeStyle='#1a3446';ctx.lineWidth=1;
+for(let i=0;i<5;i++){let y=i*H/4;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+const values=Array.from({length:24},()=>Math.random()*65+12);
+ctx.beginPath();
+values.forEach((v,i)=>{let x=i*W/23,y=H-v/100*H;if(!i)ctx.moveTo(x,y);else ctx.lineTo(x,y)});
+ctx.strokeStyle='#00f5d4';ctx.lineWidth=2;ctx.shadowColor='#00f5d4';ctx.shadowBlur=9;ctx.stroke();ctx.shadowBlur=0;
+}
+window.addEventListener('resize',drawChart);
+
+// NETWORK GRAPH
+function drawNetwork(canvasId){
+const c=document.getElementById(canvasId);if(!c)return;
+const ctx=c.getContext('2d');
+const w=c.width=c.clientWidth*devicePixelRatio,h=c.height=c.clientHeight*devicePixelRatio;
+const W=c.clientWidth,H=c.clientHeight;
+ctx.scale(devicePixelRatio,devicePixelRatio);
+const nodes=Array.from({length:12},(_,i)=>({x:W*.08+Math.random()*W*.84,y:H*.1+Math.random()*H*.8,color:i===3||i===9?'#ff4567':i===6?'#ffca58':'#00f5d4'}));
+ctx.lineWidth=1;
+nodes.forEach((n,i)=>{
+nodes.forEach((m,j)=>{
+if(j>i&&Math.hypot(n.x-m.x,n.y-m.y)<W*.37){
+ctx.strokeStyle='#28758a55';ctx.beginPath();ctx.moveTo(n.x,n.y);ctx.lineTo(m.x,m.y);ctx.stroke();
+}});
+ctx.beginPath();ctx.arc(n.x,n.y,5,0,Math.PI*2);ctx.fillStyle=n.color;ctx.shadowColor=n.color;ctx.shadowBlur=12;ctx.fill();ctx.shadowBlur=0;
+ctx.fillStyle='#91a9bd';ctx.font='9px monospace';ctx.fillText('NODE-'+(i+1),n.x+8,n.y-8);
+});
+}
+function networkDraw(){drawNetwork('networkLarge');}
+function refresh(){
+document.getElementById('threatCount').textContent=Math.floor(20+Math.random()*20);
+document.getElementById('score').textContent=(96+Math.random()*3).toFixed(1)+'%';
+logs.unshift(['INFO','SYSTEM','Dashboard refresh completed']);
+renderAll();
+drawChart();
+}
+function renderAll(){recent();renderFeed();renderThreats();renderLogs();renderIncidents();}
+renderAll();
+drawChart();drawNetwork('networkCanvas');
+setInterval(()=>{
+logs.unshift(['INFO','MONITOR','Demo telemetry heartbeat received']);
+if(logs.length>60)logs.pop();
+renderAll();
+document.getElementById('threatCount').textContent=Math.floor(20+Math.random()*20);
+},7000);
+</script>
+</body>
+</html>
